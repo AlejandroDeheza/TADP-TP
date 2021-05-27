@@ -21,7 +21,8 @@ module ObjetoPersistible
 =end
 
   def save!
-    raise SaveException.new unless atributos_persistibles
+    # TODO si usas el accesor "auto-inicializable", atributos_persistibles es siempre una collection
+    # raise SaveException.new unless atributos_persistibles
     self.class.inicializar_tabla unless self.class.tabla
     validate!                             # valida la instancia actual y las instancias asociadas
     # el "generar_hash_para_insertar" tambien cascadea el validate! a las instancias asociadas porque se realiza save! a cada una
@@ -54,6 +55,7 @@ module ObjetoPersistible
   end
 
   def corresponde_tipo(clave, valor)
+    # TODO esto es parte del problema, vas a tener este "if" por muchos lados
     if es_atributo_has_many(atributos_persistibles, clave)
       array = valor # es para darle un poquito mas de expresividad. Si entra en este if, el valor es un array
       if atributos_persistibles[clave] == Boolean
@@ -109,6 +111,8 @@ module ObjetoPersistible
   end
 
   def obtener_valor_a_insertar(simbolo, clase, valor)
+    # TODO convertilo en polimorfismo (esto mismo podría ser un método en una clase
+    # y dependiendo si la instancia es "has_many" o no, hace una cosa u otra)
     if es_atributo_has_many(atributos_persistibles, simbolo)
       obtener_valor_has_many(valor, clase)
     elsif es_tipo_primitivo(clase)

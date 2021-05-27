@@ -1,11 +1,8 @@
-describe Prueba do
-  let(:prueba) { Prueba.new }
+require_relative '../lib/ORM'
+require_relative '../lib/Excepciones'
+require_relative 'Person'
 
-  describe '#materia' do
-    it 'debería pasar este test' do
-      expect(prueba.materia).to be :tadp
-    end
-  end
+describe ORM do
 
   describe 'test_punto_1_a' do
 

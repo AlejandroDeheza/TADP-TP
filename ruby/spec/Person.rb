@@ -1,4 +1,4 @@
-require_relative 'ORM'
+require_relative '../lib/ORM'
 
 class Person
 
