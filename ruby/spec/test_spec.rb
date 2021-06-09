@@ -92,7 +92,7 @@ describe Prueba do
     end
 
     it 'usar refresh! con un objeto que no fue persistido, genera una excepcion' do
-      expect { Person.new.refresh! }.to raise_error(RefreshException)
+      expect { Person.new.refresh! }.to raise_error(IdError)
     end
 
     it 'refresh!() debe actualizar el estado del objeto en base a lo que se haya guardado en la base' do
@@ -606,17 +606,17 @@ describe Prueba do
 
       s = Student.new
       s.full_name = 5
-      expect { s.save! }.to raise_error(TipoDeDatoException) # Falla! El nombre no es un String!
+      expect { s.save! }.to raise_error(ValidatorError) # Falla! El nombre no es un String!
 
       s.full_name = "pepe botella"
       s.save! # Pasa: grade es nil, pero eso vale.
 
       s.grade = Grade.new
       s.grade.value = "pepe"
-      expect { s.save! }.to raise_error(TipoDeDatoException) # Falla! grade.value no es un Number
+      expect { s.save! }.to raise_error(ValidatorError) # Falla! grade.value no es un Number
 
       s.grade = "algo"
-      expect { s.save! }.to raise_error(TipoDeDatoException)
+      expect { s.save! }.to raise_error(ValidatorError)
 
       Student.borrar_tabla
     end
@@ -655,7 +655,7 @@ describe Prueba do
       s.grades.push(g)
       s.grades.push("algo") #falla por esta linea
       s.cuadernos.push("tadp", "am2", true) #falla por esta linea
-      expect { s.save! }.to raise_error(TipoDeDatoException)
+      expect { s.save! }.to raise_error(ValidatorError)
       TADB::DB.clear_all
     end
 
@@ -675,16 +675,16 @@ describe Prueba do
 
       s = Student.new
       s.full_name = ""
-      expect { s.save! }.to raise_error(NoBlankException) # Falla! El nombre está vacío!
+      expect { s.save! }.to raise_error(ValidatorError) # Falla! El nombre está vacío!
       s.full_name = "emanuel ortega"
       s.age = 15
-      expect { s.save! }.to raise_error(FromException) # Falla! La edad es menor a 18!
+      expect { s.save! }.to raise_error(ValidatorError) # Falla! La edad es menor a 18!
       s.age = 103
-      expect { s.save! }.to raise_error(ToException) # Falla! La edad es mayor a 100!
+      expect { s.save! }.to raise_error(ValidatorError) # Falla! La edad es mayor a 100!
       s.age = 22
       s.grades.push(Grade.new)
       s.grades.last.value = -1
-      expect { s.save! }.to raise_error(BlockValidateException) # Falla! grade.value no es > 2!
+      expect { s.save! }.to raise_error(ValidatorError) # Falla! grade.value no es > 2!
       TADB::DB.clear_all
     end
 

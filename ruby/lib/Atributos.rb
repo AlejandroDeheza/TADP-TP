@@ -13,7 +13,7 @@ class Atributo
     @nombre = params[:named]
     @tipo_atributo = tipo
     @default = params[:default]
-    @validador = ValidadorAtributos.new(params, tipo)
+    @validador = ValidatorsBuilder.build(tipo, params)
     @entidad_contenedora = entidad_contenedora
   end
 
@@ -26,6 +26,10 @@ class Atributo
   end
 
   private
+
+  def validar(errores, nombre_clase_error)
+    raise ValidatorError.new(nombre_clase_error, @nombre, errores) unless errores.empty?
+  end
 
   def setter_generico(instancia, valor_a_settear)
     instancia.send(pasar_a_setter(@nombre), valor_a_settear)
@@ -46,8 +50,8 @@ class AtributoSimple < Atributo
     super(tipo, params, clase_contenedora) # se inserta entre la instancia y su clase -> Instancia, SimpleBasico, AtributoSimple
   end
 
-  def validar_todo(valor, nombre_clase_error)
-    @validador.validar(valor, nombre_clase_error)
+  def validar(valor, nombre_clase_error)
+    super( @validador.call(valor), nombre_clase_error )
     self
   end
 
@@ -98,8 +102,8 @@ class AtributoMultiple < Atributo
     super(tipo, params, clase_contenedora)
   end
 
-  def validar_todo(valor, nombre_clase_error)
-    valor.each { |instancia| @validador.validar(instancia, nombre_clase_error) }
+  def validar(valor, nombre_clase_error)
+    valor.each { |instancia| super( @validador.call(instancia), nombre_clase_error ) }
     self
   end
 

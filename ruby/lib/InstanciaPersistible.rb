@@ -21,7 +21,7 @@ module InstanciaPersistible
   end
 
   def refresh!
-    raise RefreshException.new(self.class.name) unless @id
+    raise IdError.new(self.class.name) unless @id
     self.class.atributos_persistibles_totales.each do |atributo|
       atributo.settear(self) unless atributo.valor_persistido(self).nil?
     end
@@ -29,7 +29,7 @@ module InstanciaPersistible
   end
 
   def forget!
-    raise ForgetException.new(self.class.name) unless @id
+    raise IdError.new(self.class.name) unless @id
     self.class.borrar_de_tabla(@id)
     @id = nil
     self
@@ -37,7 +37,7 @@ module InstanciaPersistible
 
   def validate!
     self.class.atributos_persistibles_totales.each do |atributo|
-      atributo.validar_todo( send(atributo.nombre), self.class.name )
+      atributo.validar( send(atributo.nombre), self.class.name )
     end
     self
   end
@@ -58,7 +58,7 @@ module InstanciaPersistible
 
   # en el constructor de la clase se usaria asi
   #def initialize
-  #  inicializar_has_many
+  #  inicializar_atributos
   #  super
   #end
   def inicializar_atributos
