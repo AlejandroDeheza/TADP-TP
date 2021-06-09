@@ -66,7 +66,8 @@ module EntidadPersistible
   #naturalmente falla si el metodo tiene aridad != 0, porque asi esta definido en "respond_to_missing?"
   def method_missing(mensaje, *args, &bloque)
     if mensaje.to_s.start_with?("find_by_") && respond_to?(mensaje, false)
-      all_instances.select { |instancia| instancia.send(sin_find_by_(mensaje)) == args[0] }
+      filtro = args[0].is_a?(Proc) ? args[0] : proc { |v| v == args[0] }
+      all_instances.select { |instancia| instancia.instance_exec(instancia.send(sin_find_by_(mensaje)), &filtro) }
     else
       super
     end

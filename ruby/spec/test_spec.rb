@@ -714,5 +714,43 @@ describe Prueba do
 
   end
 
+  describe 'TP INDIVIDUAL' do
+
+    it "find de orden superior" do
+
+      class Student100
+        include ORM
+        has_one String, named: :full_name
+        has_one Numeric, named: :grade
+      end
+
+      e = Student100.new
+      e.grade = 7
+      e.full_name = "javier sans"
+      e.save!
+
+      a = Student100.new
+      a.grade = 4
+      a.full_name = "federico rioja"
+      a.save!
+
+      expect(Student100.all_instances.size).to eq 2
+      expect(Student100.find_by_full_name("federico rioja").size).to eq 1
+      expect(Student100.find_by_id("5").size).to eq 0 #Trae Estudiantes con id "5"
+
+      # Retorna los estudiantes con grade > "5"
+      expect(Student100.find_by_grade(proc { |grade| grade > 5 }).size).to eq 1
+      expect(Student100.find_by_grade(proc { |grade| grade > 5 })[0].full_name).to eq "javier sans"
+
+      # Falla porque el bloque lanza un error.
+      expect {
+        Student100.find_by_full_name(proc { |name| name.this_message_doesnt_exist() })
+      }.to raise_error(NoMethodError)
+
+      Student100.borrar_tabla
+
+    end
+  end
+
 end
 
