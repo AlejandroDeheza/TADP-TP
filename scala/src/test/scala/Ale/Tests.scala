@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class Tests extends AnyFreeSpec {
 
   "Primera parte - Apuestas" - {
-    val jugadaCompuesta: JugadaCompuesta = JugadaCompuesta(
+    val jugadaCompuesta: RuletaCombinada = RuletaCombinada(
       List(JugarAlRojo(25), JugarADocena(10, SegundaDocena), JugarAlNumero(30, 23))
     )
 
@@ -45,6 +45,20 @@ class Tests extends AnyFreeSpec {
       val distribucion = GeneradorDistribuciones().distribucionPonderada(lista)
       distribucion.probabilidadDe(Cara) should be(57.142857 +- 0.0001)
       distribucion.probabilidadDe(Cruz) should be(42.857142 +- 0.0001)
+    }
+  }
+
+  "Punto 4 - Permitir que un jugador juegue sucesivamente varios juegos" - {
+    "" in {
+
+    }
+
+    "" in {
+
+    }
+
+    "" in {
+
     }
   }
 }

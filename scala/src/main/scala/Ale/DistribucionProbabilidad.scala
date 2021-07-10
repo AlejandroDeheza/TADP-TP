@@ -9,10 +9,10 @@ case object SucesosRuleta {
 
 
 case class GeneradorDistribuciones() {
-  def eventoSeguro(suceso: ResultadoDeJuego): DistribucionProbabilidad = {
+  def eventoSeguro(suceso: SucesoGenerico): DistribucionProbabilidad = {
     DistribucionProbabilidad(List(SucesoConProbabilidad(suceso, 100.0)))
   }
-  def distribucionEquiprobable(sucesos: List[ResultadoDeJuego]): DistribucionProbabilidad = {
+  def distribucionEquiprobable(sucesos: List[SucesoGenerico]): DistribucionProbabilidad = {
     val cantidad: Int = sucesos.length
     DistribucionProbabilidad(sucesos.map(suceso => SucesoConProbabilidad(suceso, 100.0 / cantidad)))
   }
@@ -23,18 +23,18 @@ case class GeneradorDistribuciones() {
 }
 
 
-case class SucesoPonderado(resultadoDeJuego: ResultadoDeJuego, pesoPonderado: Int) {
+case class SucesoPonderado(resultadoDeJuego: SucesoGenerico, pesoPonderado: Int) {
   def pasarASucesoProbable(pesoTotal: Int): SucesoConProbabilidad = {
     SucesoConProbabilidad(resultadoDeJuego, (100.0 / pesoTotal) * pesoPonderado)
   }
 }
 
-case class SucesoConProbabilidad(resultadoDeJuego: ResultadoDeJuego, probabilidad: Double)
+case class SucesoConProbabilidad(resultadoDeJuego: SucesoGenerico, probabilidad: Double)
 
 case class DistribucionProbabilidad(distribucion: List[SucesoConProbabilidad]) {
-  def sucesosPosibles() : List[ResultadoDeJuego] = distribucion.filter(_.probabilidad > 0.0).map(_.resultadoDeJuego)
+  def sucesosPosibles() : List[SucesoGenerico] = distribucion.filter(_.probabilidad > 0.0).map(_.resultadoDeJuego)
 
-  def probabilidadDe(suceso: ResultadoDeJuego) :Double = {
+  def probabilidadDe(suceso: SucesoGenerico) :Double = {
     distribucion.find(su => su.resultadoDeJuego == suceso) match {
       case Some(resultado) => resultado.probabilidad
       case _ => 0.0
