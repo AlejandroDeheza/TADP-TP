@@ -69,4 +69,39 @@ class Tests extends AnyFreeSpec {
       distribucion.probabilidadDe(Ganancia(5)) should be(0.500 +- 0.0001)
     }
   }
+
+  "Punto 5 - jugadores" - {
+    val apuestas1 = List(DuplicarSiSaleCara(30), DuplicarSiSaleCara(15))
+    val apuestas2 = List(JugarAlNumero(20, 12))
+    val apuestas3 = List(JugarADocena(15, SegundaDocena))
+    val apuestas4 = List(JugarAlRojo(14), JugarAImpar(43), DuplicarSiSaleCruz(13))
+
+    val juegosSucesivos1 = JuegosSucesivos(apuestas1)
+    val juegosSucesivos2 = JuegosSucesivos(apuestas2)
+    val juegosSucesivos3 = JuegosSucesivos(apuestas3)
+    val juegosSucesivos4 = JuegosSucesivos(apuestas4)
+
+    val combinacionesDeJuegos = List(juegosSucesivos1, juegosSucesivos2, juegosSucesivos3, juegosSucesivos4)
+
+    val jugador1 = Jugador[Double](30, Racional())
+    val jugador2 = Jugador[Double](50, Arriesgado())
+    val jugador3 = Jugador[Double](90, Cauto(90))
+    val jugador4 = Jugador[Double](130, Inventado())
+
+    "1" in {
+      jugador1(combinacionesDeJuegos) should be(juegosSucesivos1)
+    }
+
+    "2" in {
+      jugador2(combinacionesDeJuegos) should be(juegosSucesivos2)
+    }
+
+    "3" in {
+      jugador3(combinacionesDeJuegos) should be(juegosSucesivos3)
+    }
+
+    "4" in {
+      jugador4(combinacionesDeJuegos) should be(juegosSucesivos4)
+    }
+  }
 }

@@ -2,25 +2,6 @@ package Ale
 
 import scala.language.implicitConversions
 
-// 3 - Crear las distribuciones de probabilidad de:
-// a - El juego de ‘cara o cruz’, donde hay 50% de chances de que salga Cara y 50% de que salga Cruz.
-// b - La ruleta, que tiene las mismas chances de que salga cualquiera de los 37 números.
-// c - ‘Cara o cruz’ pero con una moneda cargada, en este caso sale Cara 4 de cada 7 veces y Cruz las restantes.
-
-// De una distribución de probabilidad queremos poder saber:
-// - sus sucesos posibles, que sería el conjunto de sucesos de la distribución sin su probabilidad (si un suceso tiene
-// probabilidad 0 no debería estar acá).
-// - la probabilidad de un suceso en particular.
-//
-// Queremos tener algunas facilidades para construir distribuciones de probabilidad de diferentes maneras:
-// - Evento Seguro: dado un suceso, es una distribución que sólo contiene ese suceso con probabilidad de 100%.
-// - Distribución equiprobable: a partir de una lista de sucesos genera una distribución donde cada suceso tiene la misma
-// probabilidad de ocurrir.
-// - Distribución a partir de valores ponderados: dada una lista de sucesos y el “peso” de cada suceso,
-// se obtiene una distribución. Ejemplo: si tenemos un test horrible y no determinístico que falla 2 de cada 3 veces,
-// deberíamos poder construir la distribución a partir de esos valores en vez de tener que calcular la distribución a
-// mano. Entonces, a partir de TestPasa con peso 1 y TestFalla con peso 2, obtendríamos una distribución con el suceso
-// TestPasa con probabilidad 66.66% y TestFalla con probabilidad 33.34%.
 
 /*case class GeneradorDistribuciones() {
   def eventoSeguro[T <: ResultadoDeJuego](suceso: T): DistribucionProbabilidad[T] = {
