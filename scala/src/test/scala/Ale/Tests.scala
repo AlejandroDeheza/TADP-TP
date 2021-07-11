@@ -1,5 +1,6 @@
 package Ale
 
+import Ale.Utils.ResultadoRuleta
 import org.scalactic.Tolerance.convertNumericToPlusOrMinusWrapper
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.be
@@ -8,20 +9,20 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class Tests extends AnyFreeSpec {
 
   "Primera parte - Apuestas" - {
-    val jugadaCompuesta: RuletaCombinada = RuletaCombinada(
+    val jugadaCompuesta = ApuestaCombinada[ResultadoRuleta](
       List(JugarAlRojo(25), JugarADocena(10, SegundaDocena), JugarAlNumero(30, 23))
     )
 
     "primer caso" in {
-      jugadaCompuesta(ResultadoRuleta(3)) should be(50)
+      jugadaCompuesta(3) should be(50)
     }
 
     "segundo caso" in {
-      jugadaCompuesta(ResultadoRuleta(14)) should be(80)
+      jugadaCompuesta(14) should be(80)
     }
 
     "tercer caso" in {
-      jugadaCompuesta(ResultadoRuleta(23)) should be(1160)
+      jugadaCompuesta(23) should be(1160)
     }
 
   }
@@ -35,9 +36,9 @@ class Tests extends AnyFreeSpec {
 
     "La ruleta, que tiene las mismas chances de que salga cualquiera de los 37 números" in {
       val distribucion = GeneradorDistribucionesResultados().Equiprobable(SucesosRuleta.sucesos)
-      distribucion.probabilidadDe(ResultadoRuleta(0)) should be(1 / 37.0 +- 0.0001)
-      distribucion.probabilidadDe(ResultadoRuleta(17)) should be(1 / 37.0 +- 0.0001)
-      distribucion.probabilidadDe(ResultadoRuleta(36)) should be(1 / 37.0 +- 0.0001)
+      distribucion.probabilidadDe(0) should be(1 / 37.0 +- 0.0001)
+      distribucion.probabilidadDe(17) should be(1 / 37.0 +- 0.0001)
+      distribucion.probabilidadDe(36) should be(1 / 37.0 +- 0.0001)
     }
 
     "‘Cara o cruz’ pero con una moneda cargada, en este caso sale Cara 4 de cada 7 veces y Cruz las restantes" in {

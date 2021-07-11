@@ -1,12 +1,8 @@
 package Ale
 
-import Ale.Utils.Plata
+import Ale.Utils.{Plata, ResultadoRuleta}
 
-case class ResultadoRuleta(numeroResultado: Int) extends ResultadoDeJuego {
-  require(numeroResultado >= 0 && numeroResultado < 37)
-}
-
-sealed trait ApuestaRuleta extends (ResultadoRuleta => Plata) with ApuestaSimple {
+sealed trait ApuestaRuleta extends (ResultadoRuleta => Plata) with ApuestaSimple[ResultadoRuleta] {
   val sucesoGanar: SucesoPonderado
   val sucesoPerder: SucesoPonderado
   def ganarTriple(): Plata = montoApostado * 3
@@ -20,61 +16,44 @@ case class JugarAlRojo(montoApostado: Plata) extends ApuestaRuleta {
   val sucesoGanar: SucesoPonderado = SucesoPonderado(PlataWrapper(ganarDoble()), Rojo.valores.length)
   val sucesoPerder: SucesoPonderado = SucesoPonderado(PlataWrapper(perder()), Negro.valores.length + 1)
 
-  override def apply(resultado: ResultadoRuleta): Plata = resultado match {
-    case ResultadoRuleta(numeroResultado) if Rojo.contiene(numeroResultado) => ganarDoble()
-    case _ => perder()
-  }
+  override def apply(resultado: ResultadoRuleta): Plata = if (Rojo.contiene(resultado)) ganarDoble() else perder()
 }
 
 case class JugarAlNegro(montoApostado: Plata) extends ApuestaRuleta {
   val sucesoGanar: SucesoPonderado = SucesoPonderado(PlataWrapper(ganarDoble()), Negro.valores.length)
   val sucesoPerder: SucesoPonderado = SucesoPonderado(PlataWrapper(perder()), Rojo.valores.length + 1)
 
-  override def apply(resultado: ResultadoRuleta): Plata = resultado match {
-    case ResultadoRuleta(numeroResultado) if Negro.contiene(numeroResultado) => ganarDoble()
-    case _ => perder()
-  }
+  override def apply(resultado: ResultadoRuleta): Plata = if (Negro.contiene(resultado)) ganarDoble() else perder()
 }
 
 case class JugarAlNumero(montoApostado: Plata, numeroApostado: Plata) extends ApuestaRuleta {
   val sucesoGanar: SucesoPonderado = SucesoPonderado(PlataWrapper(ganarAlNumero()), 1)
   val sucesoPerder: SucesoPonderado = SucesoPonderado(PlataWrapper(perder()), 36)
 
-  override def apply(resultado: ResultadoRuleta): Plata = resultado match {
-    case ResultadoRuleta(resultado) if resultado == numeroApostado => ganarAlNumero()
-    case _ => perder()
-  }
+  override def apply(resultado: ResultadoRuleta): Plata = if (resultado == numeroApostado) ganarAlNumero() else perder()
 }
 
 case class JugarAPar(montoApostado: Plata) extends ApuestaRuleta {
   val sucesoGanar: SucesoPonderado = SucesoPonderado(PlataWrapper(ganarDoble()), 36 / 2)
   val sucesoPerder: SucesoPonderado = SucesoPonderado(PlataWrapper(perder()), 36 / 2 + 1)
 
-  override def apply(resultado: ResultadoRuleta): Plata = resultado match {
-    case ResultadoRuleta(0) => perder()
-    case ResultadoRuleta(resultado) if resultado % 2 == 0 => ganarDoble()
-    case _ => perder()
-  }
+  override def apply(resultado: ResultadoRuleta): Plata =
+    if (resultado % 2 == 0 && resultado != 0) ganarDoble() else perder()
 }
 
 case class JugarAImpar(montoApostado: Plata) extends ApuestaRuleta {
   val sucesoGanar: SucesoPonderado = SucesoPonderado(PlataWrapper(ganarDoble()), 36 / 2)
   val sucesoPerder: SucesoPonderado = SucesoPonderado(PlataWrapper(perder()), 36 / 2 + 1)
 
-  override def apply(resultado: ResultadoRuleta): Plata = resultado match {
-    case ResultadoRuleta(resultado) if resultado % 2 != 0 => ganarDoble()
-    case _ => perder()
-  }
+  override def apply(resultado: ResultadoRuleta): Plata = if (resultado % 2 != 0) ganarDoble() else perder()
 }
 
 case class JugarADocena(montoApostado: Plata, docenaElegida: Docena) extends ApuestaRuleta {
   val sucesoGanar: SucesoPonderado = SucesoPonderado(PlataWrapper(ganarTriple()), 1)
   val sucesoPerder: SucesoPonderado = SucesoPonderado(PlataWrapper(perder()), 2)
 
-  override def apply(resultado: ResultadoRuleta): Plata = resultado match {
-    case ResultadoRuleta(resultado) if docenaElegida.contiene(resultado) => ganarTriple()
-    case _ => perder()
-  }
+  override def apply(resultado: ResultadoRuleta): Plata =
+    if (docenaElegida.contiene(resultado)) ganarTriple() else perder()
 }
 
 sealed trait Color {

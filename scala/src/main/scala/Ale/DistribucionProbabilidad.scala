@@ -1,12 +1,12 @@
 package Ale
 
-import Ale.Utils.{Plata, head, last}
+import Ale.Utils.{Plata, ResultadoRuleta, head, last}
 
 case object SucesosCaraCruz {
   val sucesos: List[ResultadoCaraCruz] = List(Cara, Cruz)
 }
 case object SucesosRuleta {
-  val sucesos: List[ResultadoRuleta] = (0 to 36).map(i => ResultadoRuleta(i)).toList
+  val sucesos: List[ResultadoRuleta] = (0 to 36).toList
 }
 
 case class SucesoPonderado(resultadoDeJuego: SucesoGenerico, pesoPonderado: Int) {
