@@ -1,48 +1,45 @@
 package Ale
 
+import Ale.Utils.Plata
+
 // 5 - Modelar los 3 diferentes tipos de jugadores e inventar uno más a partir de lo que se haya modelado para crear
 // jugadores nuevos a partir de criterios.
 
-/*object tipos {
-  type CriterioEleccionJuegos[O : Ordering] = DistribucionProbabilidad => O
-}*/
-
-case class Jugador[O : Ordering](montoInicial: Int, condicion: CriterioEleccion)
+case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
   extends (List[JuegosSucesivos] => JuegosSucesivos) {
-   def apply(combinacionesDeJuegos: List[JuegosSucesivos]): JuegosSucesivos = {
+  def apply(combinacionesDeJuegos: List[JuegosSucesivos]): JuegosSucesivos = {
     combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))).get
   }
 }
 
-sealed trait CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad): Double
-}
+sealed trait CriterioEleccion extends (DistribucionGanancias => Double)
+
 case class Racional() extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad): Double = {
+  def apply(distribucion: DistribucionGanancias): Double = {
     distribucion.distribucion
-      .map(d => d.sucesoGenerico.asInstanceOf[Ganancia].monto * d.probabilidad)
+      .map(d => d.monto * d.probabilidad)
       .sum
   }
 }
 
 case class Arriesgado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad): Double = {
+  def apply(distribucion: DistribucionGanancias): Double = {
     distribucion.distribucion
-      .maxBy(s => s.sucesoGenerico.asInstanceOf[Ganancia].monto).sucesoGenerico.asInstanceOf[Ganancia].monto
+      .maxBy(s => s.monto).monto
   }
 }
 
-case class Cauto(montoInicial: Int) extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad): Double = {
+case class Cauto(montoInicial: Plata) extends CriterioEleccion {
+  def apply(distribucion: DistribucionGanancias): Double = {
     distribucion.distribucion
-      .filter(s => s.sucesoGenerico.asInstanceOf[Ganancia].monto >= montoInicial)
+      .filter(s => s.monto >= montoInicial)
       .map(s => s.probabilidad)
-      .product
+      .sum
   }
 }
 
 case class Inventado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad): Double = {
+  def apply(distribucion: DistribucionGanancias): Double = {
     distribucion.sucesosPosibles().length
   }
 }

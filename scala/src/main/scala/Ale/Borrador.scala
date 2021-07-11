@@ -38,7 +38,6 @@ case class GeneradorPonderado[T <: ResultadoDeJuego](sucesos: List[SucesoPondera
 }*/
 
 
-
 /*case object SucesosCaraCruz {
   val sucesos: List[ResultadoCaraCruz] = List(Cara, Cruz)
 }
@@ -66,121 +65,20 @@ case class DistribucionProbabilidad[T <: ResultadoDeJuego](distribucion: List[Su
     }
   }*/
 
-  /*def tieneEventoSeguro(): Boolean = distribucion.length == 1
 
-  def esEquiprobable(): Boolean = {
-    import Ale.comparadorDoubles.Comparador
-    val unaProbabilidad = distribucion.head.probabilidad
-    distribucion.forall(_.probabilidad ~= unaProbabilidad)
-  }
+
+
+
+/*def tieneEventoSeguro(): Boolean = distribucion.length == 1
+
+def esEquiprobable(): Boolean = {
+  import Ale.comparadorDoubles.Comparador
+  val unaProbabilidad = distribucion.head.probabilidad
+  distribucion.forall(_.probabilidad ~= unaProbabilidad)
+}
 }*/
 
 
-
-/*// JUEGOS SUCESIVOS <<------------------------------
-case class JuegosSucesivos(apuestas: List[Apuesta]) {
-  private def listaSinCabeza(): List[Apuesta] = apuestas match {
-    case ::(_, next) => next
-    case Nil => List()
-  }
-
-  private def siguiente(): List[Apuesta] = listaSinCabeza() match {
-    case ::(_, next) => next
-    case Nil => List()
-  }
-
-  def apply(montoInicial: Int): DistribucionProbabilidad = {
-    apuestas.foldLeft(DistribucionProbabilidad(List())) {
-      (distribucion, apuesta) => apuesta match {
-          case simple: ApuestaSimple =>
-            if (listaSinCabeza().nonEmpty && montoInicial > simple.montoApostado) {
-              simple.distribucionDeGanancias().distribucion
-                .map(_.sucesoGenerico.asInstanceOf[Ganancia].monto)
-                .flatMap(ganancia => distribucion ++ JuegosSucesivos(listaSinCabeza()).apply(montoInicial - simple.montoApostado + ganancia))
-            } else if (listaSinCabeza().nonEmpty) {
-              JuegosSucesivos(listaSinCabeza()).apply(montoInicial) ++ distribucion ++ GeneradorDistribuciones().eventoSeguro(Ganancia(montoInicial))
-            } else if (montoInicial > simple.montoApostado) {
-              simple.distribucionDeGanancias() ++ distribucion
-            } else {
-              distribucion
-            }
-          case combinada: ApuestaCombinada =>
-        }
-    }
-
-    apuestas.foldLeft(montoInicial) {
-    (monto, apuesta) => apuesta match {
-        case simple: ApuestaSimple =>
-          val montoActual = monto - simple.montoApostado
-          val montos = simple.distribucionDeGanancias().distribucion.map(_.sucesoGenerico.monto + montoActual)
-
-        match {
-          case caraCruz: ApuestaCaraCruz => caraCruz match {
-            case DuplicarSiSaleCara(montoApostado) => caraCruz.distribucionDeGanancias().sucesosPosibles()
-            case DuplicarSiSaleCruz(montoApostado) =>
-          }
-          case ruleta: ApuestaRuleta => ruleta match {
-            case JugarAlRojo(montoApostado) => ruleta.distribucionDeGanancias()
-            case JugarAlNegro(montoApostado) =>
-            case JugarAlNumero(montoApostado, numeroApostado) =>
-            case JugarAPar(montoApostado) =>
-            case JugarAImpar(montoApostado) =>
-            case JugarADocena(montoApostado, docenaElegida) =>
-          }
-        }
-        case combinada: ApuestaCombinada => combinada match {
-          case CaraCruzCombinada(apuestas) =>
-          case RuletaCombinada(apuestas) =>
-          case _ =>
-        }
-      }
-  }
-  }
-}*/
-
-
-/*// JUEGOS SUCESIVOS <<------------------------------
-case class JuegosSucesivos(apuestas: List[Apuesta]) {
-
-  // sucesoPadre inicial --> SucesoConProbabilidad(Ganancia(montoInicial), 100.0)
-  def apply(montoInicial: Int, sucesoPadre: SucesoConProbabilidad): DistribucionProbabilidad = {
-    apuestas.foldLeft(DistribucionProbabilidad(List())) {
-      (distribucion, apuesta) => apuesta match {
-          case simple: ApuestaSimple =>
-            if (listaSinCabeza().nonEmpty && montoInicial >= simple.montoApostado) {
-              simple.distribucionDeGanancias().distribucion
-                .map(_.sucesoGenerico.asInstanceOf[Ganancia].monto)
-                .map(ganancia => JuegosSucesivos(listaSinCabeza()).apply(montoInicial - simple.montoApostado + ganancia, sucesoPadre))
-                .reduce((dist1, dist2) => dist1 ++ dist2)
-            } else if (listaSinCabeza().isEmpty && montoInicial >= simple.montoApostado) {
-              simple.distribucionDeGanancias() * (sucesoPadre, simple.montoApostado)
-            } else if (siguiente().nonEmpty) {
-              JuegosSucesivos(siguiente()).apply(montoInicial,
-                GeneradorDistribuciones().eventoSeguro(Ganancia(montoInicial)).distribucion.head) * sucesoPadre
-            }  else {
-              GeneradorDistribuciones().eventoSeguro(Ganancia(montoInicial)) * sucesoPadre
-            }
-          case combinada: ApuestaCombinada => DistribucionProbabilidad(List()) // TODO: REVISAR
-        }
-    }
-  }
-
-  private def listaSinCabeza(): List[Apuesta] = apuestas match {
-    case ::(_, next) => next
-    case Nil => List()
-  }
-
-  private def siguiente(): List[Apuesta] = listaSinCabeza() match {
-    case ::(_, next) => next
-    case Nil => List()
-  }
-}*/
-
-
-/*val lista3 = otraLista.map(suce => SucesoConProbabilidad(
-      Ganancia(suce.sucesoGenerico.asInstanceOf[Ganancia].monto),
-      suce.probabilidad))
-      */
 
 
 /*// version sin fold, usando recursividad
@@ -216,8 +114,6 @@ case class JuegosSucesivos(apuestas: List[Apuesta]) {
   }*/
 
 
-
-
 /*def ++(dist: DistribucionProbabilidad): DistribucionProbabilidad = {
     DistribucionProbabilidad(dist.copy().distribucion ++ copy().distribucion)
   }
@@ -242,3 +138,37 @@ case class JuegosSucesivos(apuestas: List[Apuesta]) {
       )
     )
   }*/
+
+
+
+
+/*sealed trait Juego
+sealed trait Jugada*/
+
+/*case class CaraCruz(jugada: JugadaCaraCruz) extends Juego {
+  def apply(montoApostado: Ganancia): ApuestaCaraCruz =
+    if (jugada == ACara()) DuplicarSiSaleCara(montoApostado) else DuplicarSiSaleCruz(montoApostado)
+}
+
+sealed trait JugadaCaraCruz extends Jugada
+case class ACara() extends JugadaCaraCruz
+case class ACruz() extends JugadaCaraCruz*/
+
+/*case class Ruleta(jugada: JugadaRuleta) extends Juego {
+  def apply(montoApostado: Int): ApuestaRuleta = jugada match {
+    case AlRojo() => JugarAlRojo(montoApostado)
+    case AlNegro() => JugarAlNegro(montoApostado)
+    case APar() => JugarAPar(montoApostado)
+    case AImpar() => JugarAImpar(montoApostado)
+    case AlNumero(numeroApostado) => JugarAlNumero(montoApostado, numeroApostado)
+    case ADocena(docenaElegida) => JugarADocena(montoApostado, docenaElegida)
+  }
+}
+
+sealed trait JugadaRuleta extends Jugada
+case class AlRojo() extends JugadaRuleta
+case class AlNegro() extends JugadaRuleta
+case class APar() extends JugadaRuleta
+case class AImpar() extends JugadaRuleta
+case class AlNumero(numeroApostado: Int) extends JugadaRuleta
+case class ADocena(docenaElegida: Docena) extends JugadaRuleta*/

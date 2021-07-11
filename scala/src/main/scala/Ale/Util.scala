@@ -1,20 +1,14 @@
 package Ale
 
-object comparadorDoubles {
-  implicit val precision: Precision = Precision(0.0001)
+object Utils {
+  type Plata = Int
 
-  case class Precision(p:Double)
+  def head[A](iterable: Iterable[A]): A = {
+    iterable.head
+  }
 
-  implicit class Comparador(val d:Double) extends AnyVal {
-    def ~=(d2:Double)(implicit p:Precision): Boolean = (d - d2).abs < p.p
+  def last[A](iterable: Iterable[A]): A = {
+    iterable.last
   }
 }
 
-package object algo {
-  implicit class ListExtensions[T](list: List[T]) {
-    def maxByOption[B: Ordering](f: T => B): Option[T] = list match {
-      case Nil => None
-      case _ => Some(list.maxBy(f))
-    }
-  }
-}
