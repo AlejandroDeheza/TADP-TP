@@ -7,8 +7,8 @@ case object Cara extends ResultadoCaraCruz
 case object Cruz extends ResultadoCaraCruz
 
 sealed trait ApuestaCaraCruz extends (ResultadoCaraCruz => Plata) with ApuestaSimple[ResultadoCaraCruz] {
-  def distribucionGanancias(): DistribucionGanancias = {
-    GeneradorDistribucionesGanancias().Equiprobable(List(PlataWrapper(perder()), PlataWrapper(ganarDoble())))
+  def distribucionGanancias(): DistribucionProbabilidad[Plata] = {
+    new GeneradorDistribuciones().Equiprobable(List(perder(), ganarDoble()))
   }
 }
 

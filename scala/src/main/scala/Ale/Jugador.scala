@@ -12,34 +12,34 @@ case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
   }
 }
 
-sealed trait CriterioEleccion extends (DistribucionGanancias => Double)
+sealed trait CriterioEleccion extends (DistribucionProbabilidad[Plata] => Double)
 
 case class Racional() extends CriterioEleccion {
-  def apply(distribucion: DistribucionGanancias): Double = {
+  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
     distribucion.distribucion
-      .map(d => d.monto * d.probabilidad)
+      .map(d => d.suceso * d.probabilidad)
       .sum
   }
 }
 
 case class Arriesgado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionGanancias): Double = {
+  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
     distribucion.distribucion
-      .maxBy(s => s.monto).monto
+      .maxBy(s => s.suceso).suceso
   }
 }
 
 case class Cauto(montoInicial: Plata) extends CriterioEleccion {
-  def apply(distribucion: DistribucionGanancias): Double = {
+  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
     distribucion.distribucion
-      .filter(s => s.monto >= montoInicial)
+      .filter(s => s.suceso >= montoInicial)
       .map(s => s.probabilidad)
       .sum
   }
 }
 
 case class Inventado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionGanancias): Double = {
+  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
     distribucion.sucesosPosibles().length
   }
 }
