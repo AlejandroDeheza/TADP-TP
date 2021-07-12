@@ -6,9 +6,9 @@ import Ale.Utils.Plata
 // jugadores nuevos a partir de criterios.
 
 case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
-  extends (List[JuegosSucesivos] => JuegosSucesivos) {
+  extends (List[JuegosSucesivos] => JuegosSucesivos) { // TODO cambiar retorno a (JuegosSucesivos, DistribucionProbabilidad[Plata])
   def apply(combinacionesDeJuegos: List[JuegosSucesivos]): JuegosSucesivos = {
-    combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))).get
+    combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))).get //TODO ver el get, devolver option
   }
 }
 

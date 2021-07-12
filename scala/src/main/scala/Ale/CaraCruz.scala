@@ -6,22 +6,15 @@ sealed trait ResultadoCaraCruz //extends ResultadoDeJuego
 case object Cara extends ResultadoCaraCruz
 case object Cruz extends ResultadoCaraCruz
 
-sealed trait ApuestaCaraCruz extends (ResultadoCaraCruz => Plata) with ApuestaSimple[ResultadoCaraCruz] {
+case class CaraCruz(montoApostado: Plata, resultadoElegido: ResultadoCaraCruz) extends (ResultadoCaraCruz => Plata)
+  with ApuestaSimple[ResultadoCaraCruz] {
+
+  override def apply(resultadoObtenido: ResultadoCaraCruz): Plata = {
+    if (resultadoObtenido == resultadoElegido) ganarDoble() else perder()
+  }
+
   def distribucionGanancias(): DistribucionProbabilidad[Plata] = {
     new GeneradorDistribuciones().Equiprobable(List(perder(), ganarDoble()))
   }
 }
 
-case class JugarACara(montoApostado: Plata) extends ApuestaCaraCruz {
-  override def apply(resultado: ResultadoCaraCruz): Plata = resultado match {
-    case Cara => ganarDoble()
-    case _ => perder()
-  }
-}
-
-case class JugarACruz(montoApostado: Plata) extends ApuestaCaraCruz {
-  override def apply(resultado: ResultadoCaraCruz): Plata = resultado match {
-    case Cruz => ganarDoble()
-    case _ => perder()
-  }
-}

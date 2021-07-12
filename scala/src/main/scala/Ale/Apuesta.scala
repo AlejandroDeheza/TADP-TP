@@ -19,7 +19,7 @@ trait ApuestaSimple[T] extends Apuesta {
 // 2 - Permitir crear apuestas compuestas para los juegos cuyos resultados se modelaron en el punto anterior.
 // APUESTA COMBINADA <<------------------------------
 
-// hay alguna forma de decir ---> T = ResultadoCaraCruz || Int // TODO: REVISAR
+// hay alguna forma de decir ---> T = ResultadoCaraCruz || Int // TODO: REVISAR, mejor no, esta copado tener distribuciones de lo que venga
 case class ApuestaCombinada[T](apuestas: List[ApuestaSimple[T]]) extends (T => Plata) with Apuesta {
   def apply(resultado: T): Plata = apuestas.map(_.apply(resultado)).sum
 
@@ -37,10 +37,12 @@ case class JuegosSucesivos(apuestas: List[Apuesta]) {
       (distribucion, apuesta) => apuesta match {
           case apuesta: ApuestaSimple[_] => agregarSuceso(distribucion, apuesta.distribucionGanancias(), apuesta.montoApostado)
           case apuesta: ApuestaCombinada[_] => agregarSucesos(distribucion, apuesta.distribucionesConMontos())
-        }
+        } // TODO simplifica esto un poquito, Capaz podes agregar logica al trait "Apuesta"
     }
   }
 
+  // TODO: TESTEA BIEN ESTO DE ABAJO, ES EL CORE DEL TP
+  // TODO: fijate si es facil agregar lo que decia sobre el historial de cierto suceso
   private def agregarSuceso(distInicial: DistribucionProbabilidad[Plata], distribDe2Sucesos: DistribucionProbabilidad[Plata],
                     montoApostado: Plata): DistribucionProbabilidad[Plata] = {
     val sucesosNormales = distInicial.distribucion.filter(s => s.suceso >= montoApostado)

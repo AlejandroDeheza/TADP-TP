@@ -2,58 +2,43 @@ package Ale
 
 import Ale.Utils.{Plata, ResultadoRuleta}
 
-sealed trait ApuestaRuleta extends (ResultadoRuleta => Plata) with ApuestaSimple[ResultadoRuleta] {
-  val sucesoGanar: SucesoPonderado[Plata]
-  val sucesoPerder: SucesoPonderado[Plata]
+sealed trait JugadaRuleta
+case class AlRojo() extends JugadaRuleta
+case class AlNegro() extends JugadaRuleta
+case class APar() extends JugadaRuleta
+case class AImpar() extends JugadaRuleta
+case class AlNumero(numeroApostado: Int) extends JugadaRuleta
+case class ADocena(docenaElegida: Docena) extends JugadaRuleta
+
+case class Ruleta(montoApostado: Plata, jugadaElegida: JugadaRuleta) extends (ResultadoRuleta => Plata)
+  with ApuestaSimple[ResultadoRuleta] {
+
+  override def apply(resultado: ResultadoRuleta): Plata = jugadaElegida match {
+    case AlRojo() => if (Rojo.contiene(resultado)) ganarDoble() else perder()
+    case AlNegro() => if (Negro.contiene(resultado)) ganarDoble() else perder()
+    case APar() => if (resultado % 2 == 0 && resultado != 0) ganarDoble() else perder()
+    case AImpar() => if (resultado % 2 != 0) ganarDoble() else perder()
+    case AlNumero(numeroApostado) => if (resultado == numeroApostado) ganarAlNumero() else perder()
+    case ADocena(docenaElegida) => if (docenaElegida.contiene(resultado)) ganarTriple() else perder()
+  }
+
+  def distribucionGanancias(): DistribucionProbabilidad[Plata] = {
+    new GeneradorDistribuciones[Plata]().Ponderado(
+      jugadaElegida match {
+        case AlRojo() => List(SucesoPonderado(ganarDoble(), Rojo.valores.length),
+          SucesoPonderado(perder(), Negro.valores.length + 1))
+        case AlNegro() => List(SucesoPonderado(ganarDoble(), Negro.valores.length),
+          SucesoPonderado(perder(), Rojo.valores.length + 1))
+        case APar() => List(SucesoPonderado(ganarDoble(), 36 / 2), SucesoPonderado(perder(), 36 / 2 + 1))
+        case AImpar() => List(SucesoPonderado(ganarDoble(), 36 / 2), SucesoPonderado(perder(), 36 / 2 + 1))
+        case AlNumero(_) => List(SucesoPonderado(ganarAlNumero(), 1), SucesoPonderado(perder(), 36))
+        case ADocena(_) => List(SucesoPonderado(ganarTriple(), 1), SucesoPonderado(perder(), 2))
+      }
+    )
+  }
+
   def ganarTriple(): Plata = montoApostado * 3
   def ganarAlNumero(): Plata = montoApostado * 36
-  def distribucionGanancias(): DistribucionProbabilidad[Plata] = {
-    new GeneradorDistribuciones().Ponderado(List(sucesoGanar, sucesoPerder))
-  }
-}
-
-case class JugarAlRojo(montoApostado: Plata) extends ApuestaRuleta {
-  val sucesoGanar: SucesoPonderado[Plata] = SucesoPonderado(ganarDoble(), Rojo.valores.length)
-  val sucesoPerder: SucesoPonderado[Plata] = SucesoPonderado(perder(), Negro.valores.length + 1)
-
-  override def apply(resultado: ResultadoRuleta): Plata = if (Rojo.contiene(resultado)) ganarDoble() else perder()
-}
-
-case class JugarAlNegro(montoApostado: Plata) extends ApuestaRuleta {
-  val sucesoGanar: SucesoPonderado[Plata] = SucesoPonderado(ganarDoble(), Negro.valores.length)
-  val sucesoPerder: SucesoPonderado[Plata] = SucesoPonderado(perder(), Rojo.valores.length + 1)
-
-  override def apply(resultado: ResultadoRuleta): Plata = if (Negro.contiene(resultado)) ganarDoble() else perder()
-}
-
-case class JugarAlNumero(montoApostado: Plata, numeroApostado: Plata) extends ApuestaRuleta {
-  val sucesoGanar: SucesoPonderado[Plata] = SucesoPonderado(ganarAlNumero(), 1)
-  val sucesoPerder: SucesoPonderado[Plata] = SucesoPonderado(perder(), 36)
-
-  override def apply(resultado: ResultadoRuleta): Plata = if (resultado == numeroApostado) ganarAlNumero() else perder()
-}
-
-case class JugarAPar(montoApostado: Plata) extends ApuestaRuleta {
-  val sucesoGanar: SucesoPonderado[Plata] = SucesoPonderado(ganarDoble(), 36 / 2)
-  val sucesoPerder: SucesoPonderado[Plata] = SucesoPonderado(perder(), 36 / 2 + 1)
-
-  override def apply(resultado: ResultadoRuleta): Plata =
-    if (resultado % 2 == 0 && resultado != 0) ganarDoble() else perder()
-}
-
-case class JugarAImpar(montoApostado: Plata) extends ApuestaRuleta {
-  val sucesoGanar: SucesoPonderado[Plata] = SucesoPonderado(ganarDoble(), 36 / 2)
-  val sucesoPerder: SucesoPonderado[Plata] = SucesoPonderado(perder(), 36 / 2 + 1)
-
-  override def apply(resultado: ResultadoRuleta): Plata = if (resultado % 2 != 0) ganarDoble() else perder()
-}
-
-case class JugarADocena(montoApostado: Plata, docenaElegida: Docena) extends ApuestaRuleta {
-  val sucesoGanar: SucesoPonderado[Plata] = SucesoPonderado(ganarTriple(), 1)
-  val sucesoPerder: SucesoPonderado[Plata] = SucesoPonderado(perder(), 2)
-
-  override def apply(resultado: ResultadoRuleta): Plata =
-    if (docenaElegida.contiene(resultado)) ganarTriple() else perder()
 }
 
 sealed trait Color {

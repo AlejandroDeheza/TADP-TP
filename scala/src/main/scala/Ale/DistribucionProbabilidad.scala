@@ -39,7 +39,7 @@ class GeneradorDistribuciones[T] {
 
 case class DistribucionGananciasConMonto(distribucion: DistribucionProbabilidad[Plata], montoApostado: Plata)
 
-// hay alguna forma de decir ---> T = ResultadoCaraCruz || Int // TODO: REVISAR
+// hay alguna forma de decir ---> T = ResultadoCaraCruz || Int // TODO: REVISAR, mejor no, esta copado tener distribuciones de lo que venga
 case class DistribucionProbabilidad[T](distribucion: List[SucesoConProbabilidad[T]]) {
 
   def sucesosPosibles(): List[T] = distribucion.filter(_.probabilidad > 0.0).map(_.suceso)

@@ -10,7 +10,7 @@ class Tests extends AnyFreeSpec {
 
   "Primera parte - Apuestas" - {
     val jugadaCompuesta = ApuestaCombinada[ResultadoRuleta](
-      List(JugarAlRojo(25), JugarADocena(10, SegundaDocena), JugarAlNumero(30, 23))
+      List(Ruleta(25, AlRojo()), Ruleta(10, ADocena(SegundaDocena)), Ruleta(30, AlNumero(23)))
     )
 
     "primer caso" in {
@@ -50,7 +50,7 @@ class Tests extends AnyFreeSpec {
   }
 
   "Punto 4 - Permitir que un jugador juegue sucesivamente varios juegos" - {
-    val apuestas = List(JugarACara(10), JugarAlNumero(15, 0))
+    val apuestas = List(CaraCruz(10, Cara), Ruleta(15, AlNumero(0)))
     val distribucion = JuegosSucesivos(apuestas).apply(15)
 
 
@@ -72,10 +72,10 @@ class Tests extends AnyFreeSpec {
   }
 
   "Punto 5 - jugadores" - {
-    val apuestas1 = List(JugarACara(30), JugarACara(15))
-    val apuestas2 = List(JugarAlNumero(20, 12))
-    val apuestas3 = List(JugarADocena(15, SegundaDocena))
-    val apuestas4 = List(JugarAlRojo(14), JugarAImpar(43), JugarACruz(13))
+    val apuestas1 = List(CaraCruz(30, Cara), CaraCruz(15, Cara))
+    val apuestas2 = List(Ruleta(20, AlNumero(12)))
+    val apuestas3 = List(Ruleta(15, ADocena(SegundaDocena)))
+    val apuestas4 = List(Ruleta(14, AlRojo()), Ruleta(43, AImpar()), CaraCruz(13, Cruz))
 
     val juegosSucesivos1 = JuegosSucesivos(apuestas1)
     val juegosSucesivos2 = JuegosSucesivos(apuestas2)
