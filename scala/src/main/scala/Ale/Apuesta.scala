@@ -1,8 +1,6 @@
 package Ale
 
-import Ale.Utils.{Plata, head, last}
-
-//trait ResultadoDeJuego
+import Ale.Utils.{Plata, ResultadoDeJuego, head, last}
 
 sealed trait Apuesta
 // Tomo a la apuesta y la jugada como el mismo objeto ---> Apuesta
@@ -18,13 +16,12 @@ trait ApuestaSimple[T] extends Apuesta {
 
 // 2 - Permitir crear apuestas compuestas para los juegos cuyos resultados se modelaron en el punto anterior.
 // APUESTA COMBINADA <<------------------------------
+case class ApuestaCombinada[T : ResultadoDeJuego](apuestas: List[ApuestaSimple[T]]) extends (T => Plata) with Apuesta {
 
-// hay alguna forma de decir ---> T = ResultadoCaraCruz || Int // TODO: REVISAR, mejor no, esta copado tener distribuciones de lo que venga
-case class ApuestaCombinada[T](apuestas: List[ApuestaSimple[T]]) extends (T => Plata) with Apuesta {
-  def apply(resultado: T): Plata = apuestas.map(_.apply(resultado)).sum
+  def apply(resultado: T): Plata = ( for (a <- apuestas) yield a(resultado) ).sum
 
   def distribucionesConMontos(): List[DistribucionGananciasConMonto] = {
-    apuestas.map(d => DistribucionGananciasConMonto(d.distribucionGanancias(), d.montoApostado))
+    for (a <- apuestas) yield DistribucionGananciasConMonto(a.distribucionGanancias(), a.montoApostado)
   }
 }
 
@@ -45,11 +42,12 @@ case class JuegosSucesivos(apuestas: List[Apuesta]) {
   // TODO: fijate si es facil agregar lo que decia sobre el historial de cierto suceso
   private def agregarSuceso(distInicial: DistribucionProbabilidad[Plata], distribDe2Sucesos: DistribucionProbabilidad[Plata],
                     montoApostado: Plata): DistribucionProbabilidad[Plata] = {
-    val sucesosNormales = distInicial.distribucion.filter(s => s.suceso >= montoApostado)
-    val sucesosConPocaPlata = distInicial.distribucion.filter(s => s.suceso < montoApostado)
 
-    val sucesosNuevos = sucesosNormales.map(s => generarSuceso(s, montoApostado, distribDe2Sucesos, head))
-    val sucesosNuevos2 = sucesosNormales.map(s => generarSuceso(s, montoApostado, distribDe2Sucesos, last))
+    val sucesosNormales =     for (s <- distInicial.distribucion if s.suceso >= montoApostado) yield s
+    val sucesosConPocaPlata = for (s <- distInicial.distribucion if s.suceso < montoApostado)  yield s
+    
+    val sucesosNuevos =  for (s <- sucesosNormales) yield generarSuceso(s, montoApostado, distribDe2Sucesos, head)
+    val sucesosNuevos2 = for (s <- sucesosNormales) yield generarSuceso(s, montoApostado, distribDe2Sucesos, last)
 
     DistribucionProbabilidad[Plata](sucesosNuevos ++ sucesosNuevos2 ++ sucesosConPocaPlata)
   }

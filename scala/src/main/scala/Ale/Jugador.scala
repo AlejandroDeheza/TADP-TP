@@ -6,9 +6,13 @@ import Ale.Utils.Plata
 // jugadores nuevos a partir de criterios.
 
 case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
-  extends (List[JuegosSucesivos] => JuegosSucesivos) { // TODO cambiar retorno a (JuegosSucesivos, DistribucionProbabilidad[Plata])
-  def apply(combinacionesDeJuegos: List[JuegosSucesivos]): JuegosSucesivos = {
-    combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))).get //TODO ver el get, devolver option
+  extends (List[JuegosSucesivos] => Option[(JuegosSucesivos, DistribucionProbabilidad[Plata])]) {
+
+  def apply(combinacionesDeJuegos: List[JuegosSucesivos]): Option[(JuegosSucesivos, DistribucionProbabilidad[Plata])] = {
+    combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))) match {
+      case Some(juegosSucesivo) => Some((juegosSucesivo, juegosSucesivo(montoInicial)))
+      case None => None
+    }
   }
 }
 
@@ -16,9 +20,7 @@ sealed trait CriterioEleccion extends (DistribucionProbabilidad[Plata] => Double
 
 case class Racional() extends CriterioEleccion {
   def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
-    distribucion.distribucion
-      .map(d => d.suceso * d.probabilidad)
-      .sum
+    ( for (s <- distribucion.distribucion) yield s.suceso * s.probabilidad ).sum
   }
 }
 
@@ -31,15 +33,13 @@ case class Arriesgado() extends CriterioEleccion {
 
 case class Cauto(montoInicial: Plata) extends CriterioEleccion {
   def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
-    distribucion.distribucion
-      .filter(s => s.suceso >= montoInicial)
-      .map(s => s.probabilidad)
-      .sum
+    ( for (s <- distribucion.distribucion if s.suceso >= montoInicial) yield s.probabilidad ).sum
   }
 }
 
 case class Inventado() extends CriterioEleccion {
   def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
-    distribucion.sucesosPosibles().length
+    distribucion.sucesosPosibles()
+      .length
   }
 }

@@ -73,36 +73,3 @@ def esEquiprobable(): Boolean = {
     )
   }*/
 
-
-
-
-/*sealed trait Juego
-sealed trait Jugada*/
-
-/*case class CaraCruz(jugada: JugadaCaraCruz) extends Juego {
-  def apply(montoApostado: Ganancia): ApuestaCaraCruz =
-    if (jugada == ACara()) DuplicarSiSaleCara(montoApostado) else DuplicarSiSaleCruz(montoApostado)
-}
-
-sealed trait JugadaCaraCruz extends Jugada
-case class ACara() extends JugadaCaraCruz
-case class ACruz() extends JugadaCaraCruz*/
-
-/*case class Ruleta(jugada: JugadaRuleta) extends Juego {
-  def apply(montoApostado: Int): ApuestaRuleta = jugada match {
-    case AlRojo() => JugarAlRojo(montoApostado)
-    case AlNegro() => JugarAlNegro(montoApostado)
-    case APar() => JugarAPar(montoApostado)
-    case AImpar() => JugarAImpar(montoApostado)
-    case AlNumero(numeroApostado) => JugarAlNumero(montoApostado, numeroApostado)
-    case ADocena(docenaElegida) => JugarADocena(montoApostado, docenaElegida)
-  }
-}
-
-sealed trait JugadaRuleta extends Jugada
-case class AlRojo() extends JugadaRuleta
-case class AlNegro() extends JugadaRuleta
-case class APar() extends JugadaRuleta
-case class AImpar() extends JugadaRuleta
-case class AlNumero(numeroApostado: Int) extends JugadaRuleta
-case class ADocena(docenaElegida: Docena) extends JugadaRuleta*/

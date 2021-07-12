@@ -4,12 +4,8 @@ import Ale.Utils.{Plata, ResultadoRuleta}
 
 
 // SUCESOS <------------------------------------
-case object SucesosCaraCruz {
-  val sucesos: List[ResultadoCaraCruz] = List(Cara, Cruz)
-}
-case object SucesosRuleta {
-  val sucesos: List[ResultadoRuleta] = (0 to 36).toList
-}
+case object SucesosCaraCruz { val sucesos: List[ResultadoCaraCruz] = List(Cara, Cruz) }
+case object SucesosRuleta {   val sucesos: List[ResultadoRuleta] = (0 to 36).toList }
 
 case class SucesoPonderado[T](suceso: T, pesoPonderado: Int) {
   def pasarASucesoProbable(pesoTotal: Int): SucesoConProbabilidad[T] = {
@@ -27,22 +23,24 @@ class GeneradorDistribuciones[T] {
   }
 
   def Equiprobable(sucesos: List[T]): DistribucionProbabilidad[T] = {
-    val cantidad: Int = sucesos.length
-    DistribucionProbabilidad(sucesos.map(suceso => SucesoConProbabilidad(suceso, 1.0 / cantidad)))
+    DistribucionProbabilidad(
+      for (s <- sucesos) yield SucesoConProbabilidad(s, 1.0 / sucesos.length)
+    )
   }
 
   def Ponderado(sucesos: List[SucesoPonderado[T]]): DistribucionProbabilidad[T] = {
     val pesoTotal: Int = sucesos.map(_.pesoPonderado).sum
-    DistribucionProbabilidad(sucesos.map(_.pasarASucesoProbable(pesoTotal)))
+    DistribucionProbabilidad(
+      for (s <- sucesos) yield s.pasarASucesoProbable(pesoTotal)
+    )
   }
 }
 
 case class DistribucionGananciasConMonto(distribucion: DistribucionProbabilidad[Plata], montoApostado: Plata)
 
-// hay alguna forma de decir ---> T = ResultadoCaraCruz || Int // TODO: REVISAR, mejor no, esta copado tener distribuciones de lo que venga
 case class DistribucionProbabilidad[T](distribucion: List[SucesoConProbabilidad[T]]) {
 
-  def sucesosPosibles(): List[T] = distribucion.filter(_.probabilidad > 0.0).map(_.suceso)
+  def sucesosPosibles(): List[T] = for (s <- distribucion if s.probabilidad > 0.0) yield s.suceso
 
   def probabilidadDe(suceso: T): Double = {
     distribucion.find(su => su.suceso == suceso) match {

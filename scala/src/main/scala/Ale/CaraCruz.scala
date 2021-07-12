@@ -2,7 +2,7 @@ package Ale
 
 import Ale.Utils.Plata
 
-sealed trait ResultadoCaraCruz //extends ResultadoDeJuego
+sealed trait ResultadoCaraCruz
 case object Cara extends ResultadoCaraCruz
 case object Cruz extends ResultadoCaraCruz
 

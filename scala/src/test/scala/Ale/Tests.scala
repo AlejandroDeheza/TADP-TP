@@ -90,19 +90,19 @@ class Tests extends AnyFreeSpec {
     val jugador4 = Jugador(130, Inventado())
 
     "1" in {
-      jugador1(combinacionesDeJuegos) should be(juegosSucesivos1)
+      jugador1(combinacionesDeJuegos).getOrElse(None) should be((juegosSucesivos1, juegosSucesivos1(30)))
     }
 
     "2" in {
-      jugador2(combinacionesDeJuegos) should be(juegosSucesivos2)
+      jugador2(combinacionesDeJuegos).getOrElse(None) should be((juegosSucesivos2, juegosSucesivos2(50)))
     }
 
     /*"3" in {
-      jugador3(combinacionesDeJuegos) should be(juegosSucesivos3)
+      jugador3(combinacionesDeJuegos).getOrElse(None)  should be((juegosSucesivos3, juegosSucesivos3(90)))
     } // todo: revisar*/
 
     "4" in {
-      jugador4(combinacionesDeJuegos) should be(juegosSucesivos4)
+      jugador4(combinacionesDeJuegos).getOrElse(None)  should be((juegosSucesivos4, juegosSucesivos4(130)))
     }
   }
 }
