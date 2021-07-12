@@ -43,26 +43,19 @@ case class Ruleta(montoApostado: Plata, jugadaElegida: JugadaRuleta) extends (Re
 
 sealed trait Color {
   val valores: List[Int]
-  def contiene(num: Int): Boolean
+  def contiene(num: Int): Boolean = valores.contains(num)
 }
 case object Rojo extends Color {
   val valores: List[Int] = List(1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36)
-  override def contiene(num: Int): Boolean = valores.contains(num)
 }
 case object Negro extends Color {
   val valores: List[Int] = List(2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35)
-  override def contiene(num: Int): Boolean = valores.contains(num)
 }
 
 sealed trait Docena {
-  def contiene(num: Int): Boolean
+  val rango: Range
+  def contiene(num: Int): Boolean = rango.contains(num)
 }
-case object PrimerDocena extends Docena {
-  override def contiene(num: Int): Boolean = num >= 1 && num <= 12
-}
-case object SegundaDocena extends Docena {
-  override def contiene(num: Int): Boolean = num >= 13 && num <= 24
-}
-case object TercerDocena extends Docena {
-  override def contiene(num: Int): Boolean = num >= 25 && num <= 36
-}
+case object PrimerDocena extends Docena { val rango: Range = 1 to 12 }
+case object SegundaDocena extends Docena { val rango: Range = 13 to 24 }
+case object TercerDocena extends Docena { val rango: Range = 25 to 36 }
