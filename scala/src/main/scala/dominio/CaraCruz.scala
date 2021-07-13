@@ -1,6 +1,6 @@
-package Ale
+package dominio
 
-import Ale.Utils.Plata
+import util.Utils.Plata
 
 sealed trait ResultadoCaraCruz
 case object Cara extends ResultadoCaraCruz

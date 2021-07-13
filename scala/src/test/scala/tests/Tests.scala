@@ -1,10 +1,11 @@
-package Ale
+package tests
 
-import Ale.Utils.ResultadoRuleta
+import dominio._
 import org.scalactic.Tolerance.convertNumericToPlusOrMinusWrapper
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.be
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import util.Utils.ResultadoRuleta
 
 class Tests extends AnyFreeSpec {
 

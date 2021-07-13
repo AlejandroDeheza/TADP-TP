@@ -1,11 +1,11 @@
-package Ale
+package dominio
 
-import Ale.Utils.{Plata, ResultadoDeJuego}
+import util.Utils.{Plata, ResultadoDeJuego}
 
 sealed trait EstadoApuesta
-case class Gano() extends EstadoApuesta
-case class Perdio() extends EstadoApuesta
-case class NoJugo() extends EstadoApuesta
+case class Gano(apuesta: JuegoSimple[_]) extends EstadoApuesta
+case class Perdio(apuesta: JuegoSimple[_]) extends EstadoApuesta
+case class NoJugo(apuesta: JuegoSimple[_]) extends EstadoApuesta
 
 
 
@@ -28,7 +28,7 @@ trait JuegoSimple[T] extends Juego {
 
     val noSeJugaron =
       for (s <- distInicial.distribucion if s.suceso < montoApostado)
-        yield SucesoConEstados( s.suceso, s.probabilidad, s.copy().historialDeEstados ++ List(NoJugo()) )
+        yield SucesoConEstados( s.suceso, s.probabilidad, s.copy().historialDeEstados ++ List(NoJugo(this)) )
 
     DistribucionJugadas(sucesosNuevos ++ sucesosNuevos2 ++ noSeJugaron)
   }
@@ -37,7 +37,7 @@ trait JuegoSimple[T] extends Juego {
     val montoInicial = s.suceso
     val ganancia = distribucionGanancias().copy().distribucion(indice).suceso
     val nuevaProbabilidad = s.probabilidad * distribucionGanancias().copy().distribucion(indice).probabilidad
-    val estado = if (ganancia == 0) Perdio() else Gano()
+    val estado = if (ganancia == 0) Perdio(this) else Gano(this)
 
     SucesoConEstados(
       montoInicial - montoApostado + ganancia, nuevaProbabilidad, s.copy().historialDeEstados ++ List(estado)

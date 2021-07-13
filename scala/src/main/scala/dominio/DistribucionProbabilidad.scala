@@ -1,6 +1,6 @@
-package Ale
+package dominio
 
-import Ale.Utils.{Plata, ResultadoRuleta}
+import util.Utils.{Plata, ResultadoRuleta}
 
 
 // SUCESOS <------------------------------------

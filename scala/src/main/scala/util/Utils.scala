@@ -1,4 +1,6 @@
-package Ale
+package util
+
+import dominio.ResultadoCaraCruz
 
 object Utils {
   type Plata = Int
