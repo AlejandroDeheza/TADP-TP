@@ -6,9 +6,9 @@ import Ale.Utils.Plata
 // jugadores nuevos a partir de criterios.
 
 case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
-  extends (List[JuegosSucesivos] => Option[(JuegosSucesivos, DistribucionProbabilidad[Plata])]) {
+  extends (List[JuegosSucesivos] => Option[(JuegosSucesivos, DistribucionJugadas)]) {
 
-  def apply(combinacionesDeJuegos: List[JuegosSucesivos]): Option[(JuegosSucesivos, DistribucionProbabilidad[Plata])] = {
+  def apply(combinacionesDeJuegos: List[JuegosSucesivos]): Option[(JuegosSucesivos, DistribucionJugadas)] = {
     combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))) match {
       case Some(juegosSucesivo) => Some((juegosSucesivo, juegosSucesivo(montoInicial)))
       case None => None
@@ -16,27 +16,27 @@ case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
   }
 }
 
-sealed trait CriterioEleccion extends (DistribucionProbabilidad[Plata] => Double)
+sealed trait CriterioEleccion extends (DistribucionJugadas => Double)
 
 case class Racional() extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
+  def apply(distribucion: DistribucionJugadas): Double = {
     ( for (s <- distribucion.distribucion) yield s.suceso * s.probabilidad ).sum
   }
 }
 
 case class Arriesgado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
+  def apply(distribucion: DistribucionJugadas): Double = {
     distribucion.distribucion
       .maxBy(s => s.suceso).suceso
   }
 }
 
 case class Cauto(montoInicial: Plata) extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
+  def apply(distribucion: DistribucionJugadas): Double = {
     ( for (s <- distribucion.distribucion if s.suceso >= montoInicial) yield s.probabilidad ).sum
   }
 }
 
 case class Inventado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = distribucion.sucesosPosibles().length
+  def apply(distribucion: DistribucionJugadas): Double = distribucion.sucesosPosibles().length
 }
