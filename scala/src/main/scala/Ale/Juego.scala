@@ -1,12 +1,11 @@
 package Ale
 
-import Ale.Utils.{Plata, ResultadoDeJuego, head, last}
+import Ale.Utils.{Plata, ResultadoDeJuego}
 
 sealed trait EstadoApuesta
 case class Gano() extends EstadoApuesta
 case class Perdio() extends EstadoApuesta
 case class NoJugo() extends EstadoApuesta
-
 
 
 
@@ -23,32 +22,26 @@ trait JuegoSimple[T] extends Juego {
   def distribucionGanancias(): DistribucionProbabilidad[Plata]
 
   override def ampliarDistribucion(distInicial: DistribucionJugadas): DistribucionJugadas = {
+    val seJugaron = for (s <- distInicial.distribucion if s.suceso >= montoApostado) yield s
+    val sucesosNuevos =  for (s <- seJugaron) yield generarSuceso(0, s)
+    val sucesosNuevos2 = for (s <- seJugaron) yield generarSuceso(1, s)
 
-    val sucesosNormales =     for (s <- distInicial.distribucion if s.suceso >= montoApostado) yield s
-    val sucesosConPocaPlata = for (s <- distInicial.distribucion if s.suceso < montoApostado)  yield s
+    val noSeJugaron =
+      for (s <- distInicial.distribucion if s.suceso < montoApostado)
+        yield SucesoConEstados( s.suceso, s.probabilidad, s.copy().historialDeEstados ++ List(NoJugo()) )
 
-    val sucesosNuevos =  for (s <- sucesosNormales) yield generarSuceso(head, s)
-    val sucesosNuevos2 = for (s <- sucesosNormales) yield generarSuceso(last, s)
-    val sucesosNuevos3 = for (s <- sucesosConPocaPlata) yield generarSucesoDiferente(s)
-
-    DistribucionJugadas(sucesosNuevos ++ sucesosNuevos2 ++ sucesosNuevos3)
+    DistribucionJugadas(sucesosNuevos ++ sucesosNuevos2 ++ noSeJugaron)
   }
 
-  private def generarSuceso(f: Iterable[SucesoConProbabilidad[Plata]] => SucesoConProbabilidad[Plata],
-                            s: SucesoConEstados): SucesoConEstados = {
+  private def generarSuceso(indice: Int, s: SucesoConEstados): SucesoConEstados = {
     val montoInicial = s.suceso
-    val ganancia = f(distribucionGanancias().copy().distribucion).suceso
-    val multiplicacionProbabilidades = s.probabilidad * f(distribucionGanancias().copy().distribucion).probabilidad
+    val ganancia = distribucionGanancias().copy().distribucion(indice).suceso
+    val nuevaProbabilidad = s.probabilidad * distribucionGanancias().copy().distribucion(indice).probabilidad
+    val estado = if (ganancia == 0) Perdio() else Gano()
 
-    if (ganancia == 0) {
-      SucesoConEstados( montoInicial - montoApostado, multiplicacionProbabilidades, s.copy().historialDeEstados ++ List(Perdio()) )
-    } else {
-      SucesoConEstados( montoInicial - montoApostado + ganancia, multiplicacionProbabilidades, s.copy().historialDeEstados ++ List(Gano()) )
-    }
-  }
-
-  def generarSucesoDiferente(s: SucesoConEstados): SucesoConEstados = {
-    SucesoConEstados( s.suceso, s.probabilidad, s.copy().historialDeEstados ++ List(NoJugo()) )
+    SucesoConEstados(
+      montoInicial - montoApostado + ganancia, nuevaProbabilidad, s.copy().historialDeEstados ++ List(estado)
+    )
   }
 }
 
@@ -72,6 +65,5 @@ case class JuegosSucesivos(juegos: List[Juego]) {
   def apply(montoInicial: Plata): DistribucionJugadas = {
     val semilla = DistribucionJugadas(List(SucesoConEstados(montoInicial, 1.0, List())))
     juegos.foldLeft(semilla) { (distribucion, juego) => juego.ampliarDistribucion(distribucion) }
-  }
-  // TODO: TESTEA BIEN ESTO, ES EL CORE DEL TP
+  } // TODO: TESTEAR BIEN ESTO
 }
