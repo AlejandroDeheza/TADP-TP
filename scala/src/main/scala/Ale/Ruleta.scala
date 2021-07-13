@@ -11,7 +11,7 @@ case class AlNumero(numeroApostado: Int) extends JugadaRuleta
 case class ADocena(docenaElegida: Docena) extends JugadaRuleta
 
 case class Ruleta(montoApostado: Plata, jugadaElegida: JugadaRuleta) extends (ResultadoRuleta => Plata)
-  with ApuestaSimple[ResultadoRuleta] {
+  with JuegoSimple[ResultadoRuleta] {
 
   override def apply(resultado: ResultadoRuleta): Plata = jugadaElegida match {
     case AlRojo() => if (Rojo.contiene(resultado)) ganarDoble() else perder()

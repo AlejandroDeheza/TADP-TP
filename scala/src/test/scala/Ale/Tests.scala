@@ -9,20 +9,20 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class Tests extends AnyFreeSpec {
 
   "Primera parte - Apuestas" - {
-    val jugadaCompuesta = ApuestaCombinada[ResultadoRuleta](
+    val juegoCompuesto = JuegoCompuesto[ResultadoRuleta](
       List(Ruleta(25, AlRojo()), Ruleta(10, ADocena(SegundaDocena)), Ruleta(30, AlNumero(23)))
     )
 
     "primer caso" in {
-      jugadaCompuesta(3) should be(50)
+      juegoCompuesto(3) should be(50)
     }
 
     "segundo caso" in {
-      jugadaCompuesta(14) should be(80)
+      juegoCompuesto(14) should be(80)
     }
 
     "tercer caso" in {
-      jugadaCompuesta(23) should be(1160)
+      juegoCompuesto(23) should be(1160)
     }
 
   }
@@ -50,8 +50,8 @@ class Tests extends AnyFreeSpec {
   }
 
   "Punto 4 - Permitir que un jugador juegue sucesivamente varios juegos" - {
-    val apuestas = List(CaraCruz(10, Cara), Ruleta(15, AlNumero(0)))
-    val distribucion = JuegosSucesivos(apuestas).apply(15)
+    val juegos = List(CaraCruz(10, Cara), Ruleta(15, AlNumero(0)))
+    val distribucion = JuegosSucesivos(juegos).apply(15)
 
 
     "cantidad de sucesos posibles" in {
@@ -72,15 +72,15 @@ class Tests extends AnyFreeSpec {
   }
 
   "Punto 5 - jugadores" - {
-    val apuestas1 = List(CaraCruz(30, Cara), CaraCruz(15, Cara))
-    val apuestas2 = List(Ruleta(20, AlNumero(12)))
-    val apuestas3 = List(Ruleta(15, ADocena(SegundaDocena)))
-    val apuestas4 = List(Ruleta(14, AlRojo()), Ruleta(43, AImpar()), CaraCruz(13, Cruz))
+    val juegos1 = List(CaraCruz(30, Cara), CaraCruz(15, Cara))
+    val juegos2 = List(Ruleta(20, AlNumero(12)))
+    val juegos3 = List(Ruleta(15, ADocena(SegundaDocena)))
+    val juegos4 = List(Ruleta(14, AlRojo()), Ruleta(43, AImpar()), CaraCruz(13, Cruz))
 
-    val juegosSucesivos1 = JuegosSucesivos(apuestas1)
-    val juegosSucesivos2 = JuegosSucesivos(apuestas2)
-    val juegosSucesivos3 = JuegosSucesivos(apuestas3)
-    val juegosSucesivos4 = JuegosSucesivos(apuestas4)
+    val juegosSucesivos1 = JuegosSucesivos(juegos1)
+    val juegosSucesivos2 = JuegosSucesivos(juegos2)
+    val juegosSucesivos3 = JuegosSucesivos(juegos3)
+    val juegosSucesivos4 = JuegosSucesivos(juegos4)
 
     val combinacionesDeJuegos = List(juegosSucesivos1, juegosSucesivos2, juegosSucesivos3, juegosSucesivos4)
 

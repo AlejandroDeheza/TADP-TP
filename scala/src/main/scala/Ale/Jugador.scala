@@ -38,8 +38,5 @@ case class Cauto(montoInicial: Plata) extends CriterioEleccion {
 }
 
 case class Inventado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = {
-    distribucion.sucesosPosibles()
-      .length
-  }
+  def apply(distribucion: DistribucionProbabilidad[Plata]): Double = distribucion.sucesosPosibles().length
 }

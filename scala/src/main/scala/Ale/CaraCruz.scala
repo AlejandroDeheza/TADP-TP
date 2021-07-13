@@ -7,7 +7,7 @@ case object Cara extends ResultadoCaraCruz
 case object Cruz extends ResultadoCaraCruz
 
 case class CaraCruz(montoApostado: Plata, resultadoElegido: ResultadoCaraCruz) extends (ResultadoCaraCruz => Plata)
-  with ApuestaSimple[ResultadoCaraCruz] {
+  with JuegoSimple[ResultadoCaraCruz] {
 
   override def apply(resultadoObtenido: ResultadoCaraCruz): Plata = {
     if (resultadoObtenido == resultadoElegido) ganarDoble() else perder()

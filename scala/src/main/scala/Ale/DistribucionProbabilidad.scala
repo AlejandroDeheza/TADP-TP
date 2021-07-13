@@ -1,6 +1,6 @@
 package Ale
 
-import Ale.Utils.{Plata, ResultadoRuleta}
+import Ale.Utils.ResultadoRuleta
 
 
 // SUCESOS <------------------------------------
@@ -8,13 +8,13 @@ case object SucesosCaraCruz { val sucesos: List[ResultadoCaraCruz] = List(Cara, 
 case object SucesosRuleta {   val sucesos: List[ResultadoRuleta] = (0 to 36).toList }
 
 case class SucesoPonderado[T](suceso: T, pesoPonderado: Int) {
+
   def pasarASucesoProbable(pesoTotal: Int): SucesoConProbabilidad[T] = {
     SucesoConProbabilidad(suceso, (1.0 / pesoTotal) * pesoPonderado)
   }
 }
 
 case class SucesoConProbabilidad[T](suceso: T, probabilidad: Double)
-
 
 // DISTRIBUCIONES <<---------------------------------------------
 class GeneradorDistribuciones[T] {
@@ -36,16 +36,12 @@ class GeneradorDistribuciones[T] {
   }
 }
 
-case class DistribucionGananciasConMonto(distribucion: DistribucionProbabilidad[Plata], montoApostado: Plata)
-
 case class DistribucionProbabilidad[T](distribucion: List[SucesoConProbabilidad[T]]) {
 
   def sucesosPosibles(): List[T] = for (s <- distribucion if s.probabilidad > 0.0) yield s.suceso
 
-  def probabilidadDe(suceso: T): Double = {
-    distribucion.find(su => su.suceso == suceso) match {
-      case Some(resultado) => resultado.probabilidad
-      case _ => 0.0
-    }
+  def probabilidadDe(suceso: T): Double = distribucion.find(su => su.suceso == suceso) match {
+    case Some(resultado) => resultado.probabilidad
+    case _ => 0.0
   }
 }
