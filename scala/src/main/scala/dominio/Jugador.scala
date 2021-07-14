@@ -27,7 +27,7 @@ case class Racional() extends CriterioEleccion {
 case class Arriesgado() extends CriterioEleccion {
   def apply(distribucion: DistribucionJugadas): Double = {
     distribucion.distribucion
-      .maxBy(s => s.suceso).suceso
+      .maxBy(_.suceso).suceso
   }
 }
 
@@ -38,5 +38,5 @@ case class Cauto(montoInicial: Plata) extends CriterioEleccion {
 }
 
 case class Inventado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionJugadas): Double = distribucion.sucesosPosibles().length
+  def apply(distribucion: DistribucionJugadas): Double = distribucion.sucesosPosibles.length
 }
