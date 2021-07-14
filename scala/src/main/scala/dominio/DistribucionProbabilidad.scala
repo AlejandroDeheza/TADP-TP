@@ -5,7 +5,7 @@ import util.Utils.{Plata, ResultadoRuleta}
 
 // SUCESOS <------------------------------------
 case object SucesosCaraCruz { lazy val sucesos: List[ResultadoCaraCruz] = List(Cara, Cruz) }
-case object SucesosRuleta {   lazy val sucesos: List[ResultadoRuleta] = (0 to 36).toList }
+case object SucesosRuleta   { lazy val sucesos: List[ResultadoRuleta] = (0 to 36).toList }
 
 sealed trait SucesoRelevante[T] {
   val suceso: T

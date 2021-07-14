@@ -87,7 +87,7 @@ class Tests extends AnyFreeSpec {
 
     val jugador1 = Jugador(30, Racional())
     val jugador2 = Jugador(50, Arriesgado())
-    val jugador3 = Jugador(90, Cauto(90))
+    val jugador3 = Jugador(90, Cauto())
     val jugador4 = Jugador(130, Inventado())
 
     "1" in {
