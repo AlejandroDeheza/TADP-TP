@@ -14,12 +14,7 @@ sealed trait SucesoRelevante[T] {
 case class SucesoConProbabilidad[T](suceso: T, probabilidad: Double) extends SucesoRelevante[T]
 case class SucesoConEstados(suceso: Plata, probabilidad: Double, historialDeEstados: List[EstadoApuesta]) extends SucesoRelevante[Plata]
 
-case class SucesoPonderado[T](suceso: T, pesoPonderado: Int) {
-
-  def pasarASucesoProbable(pesoTotal: Int): SucesoConProbabilidad[T] = {
-    SucesoConProbabilidad(suceso, (1.0 / pesoTotal) * pesoPonderado)
-  }
-}
+case class SucesoPonderado[T](suceso: T, pesoPonderado: Int)
 
 // DISTRIBUCIONES <<---------------------------------------------
 class GeneradorDistribuciones[T] {
@@ -36,8 +31,13 @@ class GeneradorDistribuciones[T] {
   def ponderado(sucesos: List[SucesoPonderado[T]]): DistribucionProbabilidad[T] = {
     val pesoTotal: Int = sucesos.map(_.pesoPonderado).sum
     DistribucionProbabilidad(
-      for (s <- sucesos) yield s.pasarASucesoProbable(pesoTotal)
+      for (s <- sucesos)
+        yield pasarASucesoProbable(s, pesoTotal)
     )
+  }
+
+  private def pasarASucesoProbable(s: SucesoPonderado[T], pesoTotal: Int): SucesoConProbabilidad[T] = {
+    SucesoConProbabilidad(s.suceso, (1.0 / pesoTotal) * s.pesoPonderado)
   }
 }
 
