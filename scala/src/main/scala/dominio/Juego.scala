@@ -10,17 +10,15 @@ case class NoJugo(apuesta: JuegoSimple[_]) extends EstadoApuesta
 
 
 // Tomo al juego y la apuesta como el mismo objeto ---> Juego
-sealed trait Juego {
+sealed trait Juego[T] extends (T => Plata) {
   def ampliarDistribucion(distInicial: DistribucionJugadas): DistribucionJugadas
 }
 
-trait JuegoSimple[T] extends Juego {
+trait JuegoSimple[T] extends Juego[T] {
   val montoApostado: Plata
   val distribucionGanancias: DistribucionProbabilidad[Plata]
   lazy val pierde: Plata = 0
   lazy val ganaDoble: Plata = montoApostado * 2
-
-  def apply(resultado: T): Plata
 
   override def ampliarDistribucion(distInicial: DistribucionJugadas): DistribucionJugadas = {
     val seJugaron = for (s <- distInicial.distribucion if s.suceso >= montoApostado) yield s
@@ -29,7 +27,7 @@ trait JuegoSimple[T] extends Juego {
 
     val noSeJugaron =
       for (s <- distInicial.distribucion if s.suceso < montoApostado)
-        yield s.copy(historialDeEstados = s.historialDeEstados ++ List(NoJugo(this)))
+        yield s.copy(historial = s.historial ++ List(NoJugo(this)))
 
     DistribucionJugadas(sucesosNuevos ++ sucesosNuevos2 ++ noSeJugaron)
   }
@@ -41,7 +39,7 @@ trait JuegoSimple[T] extends Juego {
     val estado = if (ganancia == 0) Perdio(this) else Gano(this)
 
     SucesoConEstados(
-      montoInicial - montoApostado + ganancia, nuevaProbabilidad, s.historialDeEstados ++ List(estado)
+      montoInicial - montoApostado + ganancia, nuevaProbabilidad, s.historial ++ List(estado)
     )
   }
 }
@@ -49,19 +47,18 @@ trait JuegoSimple[T] extends Juego {
 
 // 2 - Permitir crear apuestas compuestas para los juegos cuyos resultados se modelaron en el punto anterior.
 // JUEGO COMPUESTO <<------------------------------
-case class JuegoCompuesto[T : ResultadoDeJuego](juegosSimples: List[JuegoSimple[T]]) extends (T => Plata) with Juego {
+case class JuegoCompuesto[T : ResultadoDeJuego](juegosSimples: List[JuegoSimple[T]]) extends Juego[T] {
 
   def apply(resultado: T): Plata = ( for (j <- juegosSimples) yield j(resultado) ).sum
 
-  override def ampliarDistribucion(distInicial: DistribucionJugadas): DistribucionJugadas = {
+  override def ampliarDistribucion(distInicial: DistribucionJugadas): DistribucionJugadas =
     juegosSimples.foldLeft(distInicial){ (distrib, juegoSimple) => juegoSimple.ampliarDistribucion(distrib) }
-  }
 }
 
 
 // 4 - Permitir que un jugador juegue sucesivamente varios juegos
 // JUEGOS SUCESIVOS <<---------------------------------------
-case class JuegosSucesivos(juegos: List[Juego]) {
+case class JuegosSucesivos(juegos: List[Juego[_]]) extends (Plata => DistribucionJugadas) {
 
   def apply(montoInicial: Plata): DistribucionJugadas = {
     val semilla = DistribucionJugadas(List(SucesoConEstados(montoInicial, 1.0, List())))

@@ -10,8 +10,7 @@ case class AImpar() extends JugadaRuleta
 case class AlNumero(numeroApostado: Int) extends JugadaRuleta
 case class ADocena(docenaElegida: Docena) extends JugadaRuleta
 
-case class Ruleta(montoApostado: Plata, jugadaElegida: JugadaRuleta) extends (ResultadoRuleta => Plata)
-  with JuegoSimple[ResultadoRuleta] {
+case class Ruleta(montoApostado: Plata, jugadaElegida: JugadaRuleta) extends JuegoSimple[ResultadoRuleta] {
 
   lazy val ganaTriple: Plata = montoApostado * 3
   lazy val ganaAlNumero: Plata = montoApostado * 36
@@ -24,8 +23,8 @@ case class Ruleta(montoApostado: Plata, jugadaElegida: JugadaRuleta) extends (Re
       case AlNumero(_) => (ganaAlNumero, 1,                 pierde, 36)
       case ADocena(_)  => (ganaTriple, 1,                   pierde, 2)
     }
-    new GeneradorDistribuciones[Plata]().ponderado(
-      List(SucesoPonderado(c._1, c._2), SucesoPonderado(c._3, c._4))
+    GeneradorDistribuciones[Plata](
+      Ponderados(List(SucesoPonderado(c._1, c._2), SucesoPonderado(c._3, c._4)))
     )
   }
 
