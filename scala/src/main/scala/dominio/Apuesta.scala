@@ -15,43 +15,37 @@ sealed trait Apuesta[T] extends (T => Plata) {
 case class ApuestaSimple[T](montoApostado: Plata, jugada: Jugada[T]) extends Apuesta[T] {
   lazy val ganar: Plata = jugada.multiplicador * montoApostado
   lazy val perder: Plata = jugada.multiplicadorSiPierde * montoApostado
-
-  lazy val distribucionGanancias: DistribucionProbabilidad[Plata] = {
-    val tupla = jugada match {
-      case _ : JugadaCaraCruz => (  1/2.0,    1/2.0)
-      case _ : JugarAl        => (18/37.0,  19/37.0)
-      case _ : ADocena        => (12/37.0,  25/37.0)
-      case _ : AlNumero       => ( 1/37.0,  36/37.0)
-    }
-    DistribucionProbabilidad(List(SucesoConProbabilidad(ganar, tupla._1), SucesoConProbabilidad(perder, tupla._2)))
-  }
+  lazy val probs: (Double, Double) = jugada.probabilidadesGanarYPerder
+  lazy val distribucionGanancias: DistribucionProbabilidad[Plata] =
+    DistribucionProbabilidad(List(SucesoConProbabilidad(ganar, probs._1), SucesoConProbabilidad(perder, probs._2)))
 
   def apply(resultadoObtenido: T): Plata = if (jugada.cumpleCon(resultadoObtenido)) ganar else perder
 
-  override def ampliarDistribucion(distInicial: DistribucionApuestas): DistribucionApuestas = {
-    val sucesosNuevos = distInicial.sucesos.collect {
-      case s if s.valor >= montoApostado => distribucionGanancias.sucesos.map( s.indicarQueSiJugo(_, this) )
-      case s if s.valor <  montoApostado => List( s.indicarQueNoJugo(this) )
-    }.flatten
+  override def ampliarDistribucion(distInicial: DistribucionApuestas): DistribucionApuestas =
+    distInicial.copy(sucesos = distInicial.sucesos.flatMap(generarSucesosNuevos))
 
-    distInicial.copy(sucesos = sucesosNuevos)
+  private def generarSucesosNuevos(suceso: SucesoConEstados): List[SucesoConEstados] = {
+    if (suceso.valor < montoApostado)
+      List( suceso.indicarQueNoJugo(this) )
+    else
+      distribucionGanancias.sucesos.map{ suceso.indicarSiGanoOPerdio(_, this) }
   }
 }
 
 
 // 2 - Permitir crear apuestas compuestas para los juegos cuyos resultados se modelaron en el punto anterior.
-// APUESTA COMPUESTA <<------------------------------
+
 case class ApuestaCompuesta[T: ResultadoDeJuego](apuestasSimples: List[ApuestaSimple[T]]) extends Apuesta[T] {
 
   def apply(resultado: T): Plata = apuestasSimples.map(unaApuesta => unaApuesta(resultado)).sum
 
   override def ampliarDistribucion(distInicial: DistribucionApuestas): DistribucionApuestas =
-    apuestasSimples.foldLeft(distInicial){ (distrib, apuestaSimple) => apuestaSimple.ampliarDistribucion(distrib) }
+    apuestasSimples.foldLeft(distInicial) { (distrib, apuestaSimple) => apuestaSimple.ampliarDistribucion(distrib) }
 }
 
 
 // 4 - Permitir que un jugador juegue sucesivamente varios juegos
-// APUESTAS SUCESIVAS <<---------------------------------------
+
 case class ApuestasSucesivas(apuestas: List[Apuesta[_]]) extends (Plata => DistribucionApuestas) {
 
   def apply(montoInicial: Plata): DistribucionApuestas = {

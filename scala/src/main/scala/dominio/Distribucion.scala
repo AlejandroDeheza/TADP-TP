@@ -2,17 +2,17 @@ package dominio
 
 import util.Utils.Plata
 
-
 // SUCESOS <------------------------------------
 sealed trait SucesoProb[T] {
   val valor: T
   val probabilidad: Double
 }
+
 case class SucesoConProbabilidad[T](valor: T, probabilidad: Double) extends SucesoProb[T]
 
 case class SucesoConEstados(valor: Plata, probabilidad: Double, historial: List[EstadoApuesta]) extends SucesoProb[Plata] {
 
-  def indicarQueSiJugo(s: SucesoConProbabilidad[Plata], apuesta: ApuestaSimple[_]): SucesoConEstados = {
+  def indicarSiGanoOPerdio(s: SucesoConProbabilidad[Plata], apuesta: ApuestaSimple[_]): SucesoConEstados = {
     val ganancia = s.valor
     val estado = if (ganancia == 0) Perdio(apuesta) else Gano(apuesta)
     copy(
@@ -26,7 +26,6 @@ case class SucesoConEstados(valor: Plata, probabilidad: Double, historial: List[
 }
 
 case class SucesoPonderado[T](valor: T, pesoPonderado: Int)
-
 
 
 // DISTRIBUCIONES <<---------------------------------------------
@@ -56,10 +55,7 @@ sealed trait Distribucion[T] {
 
   lazy val sucesosPosibles: List[T] = for (s <- sucesos if s.probabilidad > 0.0) yield s.valor
 
-  def probabilidadDe(valor: T): Double = sucesos.find(s => s.valor == valor) match {
-    case Some(s) => s.probabilidad
-    case _ => 0.0
-  }
+  def probabilidadDe(valor: T): Double = sucesos.find(s => s.valor == valor).map(_.probabilidad).getOrElse(0.0)
 }
 
 case class DistribucionProbabilidad[T](sucesos: List[SucesoConProbabilidad[T]]) extends Distribucion[T]

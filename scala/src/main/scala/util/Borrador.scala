@@ -141,3 +141,57 @@ val tupla = jugada match {
       Ponderados(List(SucesoPonderado(ganar, tupla._1), SucesoPonderado(perder, tupla._2)))
     )*/
  */
+
+
+
+/*override def ampliarDistribucion(distInicial: DistribucionApuestas): DistribucionApuestas = {
+    val sucesosNuevos = distInicial.sucesos.collect {
+      case s if s.valor >= montoApostado => distribucionGanancias.sucesos.map( s.indicarSiGanoOPerdio(_, this) )
+      case s if s.valor <  montoApostado => List( s.indicarQueNoJugo(this) )
+    }.flatten
+
+    distInicial.copy(sucesos = sucesosNuevos)
+  }*/
+
+
+
+/*private def generarSucesosNuevos2(suceso: SucesoConEstados): List[SucesoConEstados] = {
+    if (suceso.valor < montoApostado) List( suceso.indicarQueNoJugo(this) )
+    else distribucionGanancias.sucesos.map{ suceso.indicarSiGanoOPerdio(_, this) }
+  }*/
+
+
+
+
+/// OTRO CAMBIO IMPORTANTE ----------------------------------------------------
+
+//sealed trait JugadaRuleta extends Jugada[ResultadoRuleta]
+
+/*case class JugarAl(modalidad: ModalidadRuleta, multiplicador: Int = 2) extends JugadaRuleta {
+  lazy val probabilidadesGanarYPerder: (Double, Double) = (18/37.0, 19/37.0)
+  override def cumpleCon(resultadoObtenido: ResultadoRuleta): Boolean = modalidad match {
+    case Rojo   => Rojo.contiene(resultadoObtenido)
+    case Negro  => Negro.contiene(resultadoObtenido)
+    case Par    => resultadoObtenido % 2 == 0 && resultadoObtenido != 0
+    case Impar  => resultadoObtenido % 2 != 0
+  }
+}
+
+case class ADocena(docenaElegida: Docena, multiplicador: Int = 3) extends JugadaRuleta {
+  lazy val probabilidadesGanarYPerder: (Double, Double) = (12/37.0, 25/37.0)
+  override def cumpleCon(resultadoObtenido: ResultadoRuleta): Boolean = docenaElegida.contiene(resultadoObtenido)
+}
+
+case class AlNumero(numeroApostado: Int, multiplicador: Int = 36) extends JugadaRuleta {
+  lazy val probabilidadesGanarYPerder: (Double, Double) = (1/37.0, 36/37.0)
+  override def cumpleCon(resultadoObtenido: ResultadoRuleta): Boolean = numeroApostado == resultadoObtenido
+}*/
+
+
+/*sealed trait DocenaObject /*extends ModalidadRuleta*/ {
+  val rango: Range
+  def contiene(num: Int): Boolean = rango.contains(num)
+}
+case object PrimerDocena  extends DocenaObject { lazy val rango: Range =  1 to 12 }
+case object SegundaDocena extends DocenaObject { lazy val rango: Range = 13 to 24 }
+case object TercerDocena  extends DocenaObject { lazy val rango: Range = 25 to 36 }*/

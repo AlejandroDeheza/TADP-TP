@@ -8,12 +8,11 @@ import util.Utils.Plata
 case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
   extends (List[ApuestasSucesivas] => Option[(ApuestasSucesivas, DistribucionApuestas)]) {
 
-  def apply(combinacionesDeJuegos: List[ApuestasSucesivas]): Option[(ApuestasSucesivas, DistribucionApuestas)] = {
-    combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))) match {
-      case Some(juegosSucesivo) => Some((juegosSucesivo, juegosSucesivo(montoInicial)))
-      case None => None
-    }
-  }
+  def apply(apuestasSucesivas: List[ApuestasSucesivas]): Option[(ApuestasSucesivas, DistribucionApuestas)] = {
+    apuestasSucesivas.maxByOption(unaApuestaSucesiva => condicion(unaApuestaSucesiva(montoInicial)))
+      .map(unaApuestaSucesiva => (unaApuestaSucesiva, unaApuestaSucesiva(montoInicial)))
+  }// TODO: creo que puedo cambiar el maxByOption por un maxBy
+  // TODO: creo que con solo devolver la distribucion resultante es suficiente tambien
 }
 
 sealed trait CriterioEleccion extends (DistribucionApuestas => Int)
