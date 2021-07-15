@@ -10,8 +10,8 @@ import util.Utils.ResultadoRuleta
 class Tests extends AnyFreeSpec {
 
   "Primera parte - Apuestas" - {
-    val juegoCompuesto = JuegoCompuesto[ResultadoRuleta](
-      List(Ruleta(25, AlRojo()), Ruleta(10, ADocena(SegundaDocena)), Ruleta(30, AlNumero(23)))
+    val juegoCompuesto = ApuestaCompuesta[ResultadoRuleta](
+      List(ApuestaSimple(25, JugarAl(Rojo)), ApuestaSimple(10, ADocena(SegundaDocena)), ApuestaSimple(30, AlNumero(23)))
     )
 
     "primer caso" in {
@@ -30,13 +30,13 @@ class Tests extends AnyFreeSpec {
 
   "Punto 3 - Distribuciones: Crear las distribuciones de probabilidad de" - {
     "El juego de ‘cara o cruz’, donde hay 50% de chances de que salga Cara y 50% de que salga Cruz" in {
-      val distribucion = GeneradorDistribuciones(Equiprobables(SucesosCaraCruz.sucesos))
+      val distribucion = CaraCruz.distribucionResultados
       distribucion.probabilidadDe(Cara) should be(0.50)
       distribucion.probabilidadDe(Cruz) should be(0.50)
     }
 
     "La ruleta, que tiene las mismas chances de que salga cualquiera de los 37 números" in {
-      val distribucion = GeneradorDistribuciones(Equiprobables(SucesosRuleta.sucesos))
+      val distribucion = Ruleta.distribucionResultados
       distribucion.probabilidadDe(0) should be(1 / 37.0 +- 0.0001)
       distribucion.probabilidadDe(17) should be(1 / 37.0 +- 0.0001)
       distribucion.probabilidadDe(36) should be(1 / 37.0 +- 0.0001)
@@ -51,9 +51,8 @@ class Tests extends AnyFreeSpec {
   }
 
   "Punto 4 - Permitir que un jugador juegue sucesivamente varios juegos" - {
-    val juegos = List(CaraCruz(10, Cara), Ruleta(15, AlNumero(0)))
-    val distribucion = JuegosSucesivos(juegos).apply(15)
-
+    val juegos = List(ApuestaSimple(10, JugadaCaraCruz(Cara)), ApuestaSimple(15, AlNumero(0)))
+    val distribucion = ApuestasSucesivas(juegos).apply(15)
 
     "cantidad de sucesos posibles" in {
       distribucion.sucesosPosibles.length should be(3)
@@ -73,22 +72,22 @@ class Tests extends AnyFreeSpec {
   }
 
   "Punto 5 - jugadores" - {
-    val juegos1 = List(CaraCruz(30, Cara), CaraCruz(15, Cara))
-    val juegos2 = List(Ruleta(20, AlNumero(12)))
-    val juegos3 = List(Ruleta(15, ADocena(SegundaDocena)))
-    val juegos4 = List(Ruleta(14, AlRojo()), Ruleta(43, AImpar()), CaraCruz(13, Cruz))
+    val juegos1 = List(ApuestaSimple(30, JugadaCaraCruz(Cara)), ApuestaSimple(15, JugadaCaraCruz(Cara)))
+    val juegos2 = List(ApuestaSimple(20, AlNumero(12)))
+    val juegos3 = List(ApuestaSimple(15, ADocena(SegundaDocena)))
+    val juegos4 = List(ApuestaSimple(14, JugarAl(Rojo)), ApuestaSimple(43, JugarAl(Impar)), ApuestaSimple(13, JugadaCaraCruz(Cruz)))
 
-    val juegosSucesivos1 = JuegosSucesivos(juegos1)
-    val juegosSucesivos2 = JuegosSucesivos(juegos2)
-    val juegosSucesivos3 = JuegosSucesivos(juegos3)
-    val juegosSucesivos4 = JuegosSucesivos(juegos4)
+    val juegosSucesivos1 = ApuestasSucesivas(juegos1)
+    val juegosSucesivos2 = ApuestasSucesivas(juegos2)
+    val juegosSucesivos3 = ApuestasSucesivas(juegos3)
+    val juegosSucesivos4 = ApuestasSucesivas(juegos4)
 
     val combinacionesDeJuegos = List(juegosSucesivos1, juegosSucesivos2, juegosSucesivos3, juegosSucesivos4)
 
-    val jugador1 = Jugador(30, Racional())
-    val jugador2 = Jugador(50, Arriesgado())
-    val jugador3 = Jugador(90, Cauto())
-    val jugador4 = Jugador(130, Inventado())
+    val jugador1 = Jugador(30, Racional)
+    val jugador2 = Jugador(50, Arriesgado)
+    val jugador3 = Jugador(90, Cauto)
+    val jugador4 = Jugador(130, Inventado)
 
     "1" in {
       jugador1(combinacionesDeJuegos).getOrElse(None) should be((juegosSucesivos1, juegosSucesivos1(30)))

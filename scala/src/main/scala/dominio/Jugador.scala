@@ -6,35 +6,38 @@ import util.Utils.Plata
 // jugadores nuevos a partir de criterios.
 
 case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
-  extends (List[JuegosSucesivos] => Option[(JuegosSucesivos, DistribucionJugadas)]) {
+  extends (List[ApuestasSucesivas] => Option[(ApuestasSucesivas, DistribucionApuestas)]) {
 
-  def apply(combinacionesDeJuegos: List[JuegosSucesivos]): Option[(JuegosSucesivos, DistribucionJugadas)] = {
-    combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial), montoInicial)) match {
+  def apply(combinacionesDeJuegos: List[ApuestasSucesivas]): Option[(ApuestasSucesivas, DistribucionApuestas)] = {
+    combinacionesDeJuegos.maxByOption(juegosSucesivos => condicion(juegosSucesivos(montoInicial))) match {
       case Some(juegosSucesivo) => Some((juegosSucesivo, juegosSucesivo(montoInicial)))
       case None => None
     }
   }
 }
 
-sealed trait CriterioEleccion extends ((DistribucionJugadas, Plata) => Int) {
-  def apply(distribucion: DistribucionJugadas, montoInicial: Plata): Int
+sealed trait CriterioEleccion extends (DistribucionApuestas => Int)
+
+case object Racional extends CriterioEleccion {
+  def apply(distribucion: DistribucionApuestas): Int =
+    ( for (s <- distribucion.sucesos) yield s.valor * s.probabilidad ).sum.toInt
 }
 
-case class Racional() extends CriterioEleccion {
-  def apply(distribucion: DistribucionJugadas, montoInicial: Plata): Int =
-    ( for (s <- distribucion.distribucion) yield s.suceso * s.probabilidad ).sum.toInt
+case object Arriesgado extends CriterioEleccion {
+  def apply(distribucion: DistribucionApuestas): Int =
+    distribucion.sucesos.maxBy(_.valor).valor
 }
 
-case class Arriesgado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionJugadas, montoInicial: Plata): Int =
-    distribucion.distribucion.maxBy(_.suceso).suceso
+case object Cauto extends CriterioEleccion {
+  def apply(distribucion: DistribucionApuestas): Int =
+    ( for (s <- distribucion.sucesos if s.valor >= distribucion.montoInicial) yield s.probabilidad ).sum.toInt
 }
 
-case class Cauto() extends CriterioEleccion {
-  def apply(distribucion: DistribucionJugadas, montoInicial: Plata): Int =
-    ( for (s <- distribucion.distribucion if s.suceso >= montoInicial) yield s.probabilidad ).sum.toInt
+case object Inventado extends CriterioEleccion {
+  def apply(distribucion: DistribucionApuestas): Int = distribucion.sucesosPosibles.length
 }
 
-case class Inventado() extends CriterioEleccion {
-  def apply(distribucion: DistribucionJugadas, montoInicial: Plata): Int = distribucion.sucesosPosibles.length
+case class CriterioCustom(criterio: DistribucionApuestas => Int) extends CriterioEleccion {
+  override def apply(distribucion: DistribucionApuestas): Plata =
+    criterio(distribucion)
 }
