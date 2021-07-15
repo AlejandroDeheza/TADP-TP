@@ -51,5 +51,5 @@ case class ApuestasSucesivas(apuestas: List[Apuesta[_]]) extends (Plata => Distr
   def apply(montoInicial: Plata): DistribucionApuestas = {
     val semilla = DistribucionApuestas(List(SucesoConEstados(montoInicial, 1.0, List())), montoInicial)
     apuestas.foldLeft(semilla) { (distribucion, unaApuesta) => unaApuesta.ampliarDistribucion(distribucion) }
-  } // TODO: TESTEAR BIEN ESTO
+  }
 }

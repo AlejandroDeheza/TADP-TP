@@ -6,13 +6,12 @@ import util.Utils.Plata
 // jugadores nuevos a partir de criterios.
 
 case class Jugador(montoInicial: Plata, condicion: CriterioEleccion)
-  extends (List[ApuestasSucesivas] => Option[(ApuestasSucesivas, DistribucionApuestas)]) {
+  extends (List[ApuestasSucesivas] => (ApuestasSucesivas, DistribucionApuestas)) {
 
-  def apply(apuestasSucesivas: List[ApuestasSucesivas]): Option[(ApuestasSucesivas, DistribucionApuestas)] = {
-    apuestasSucesivas.maxByOption(unaApuestaSucesiva => condicion(unaApuestaSucesiva(montoInicial)))
-      .map(unaApuestaSucesiva => (unaApuestaSucesiva, unaApuestaSucesiva(montoInicial)))
-  }// TODO: creo que puedo cambiar el maxByOption por un maxBy
-  // TODO: creo que con solo devolver la distribucion resultante es suficiente tambien
+  def apply(apuestasSucesivas: List[ApuestasSucesivas]): (ApuestasSucesivas, DistribucionApuestas) = {
+    val unaApuestaSucesiva = apuestasSucesivas.maxBy(unaApuestaSucesiva => condicion(unaApuestaSucesiva(montoInicial)))
+    (unaApuestaSucesiva, unaApuestaSucesiva(montoInicial))
+  }
 }
 
 sealed trait CriterioEleccion extends (DistribucionApuestas => Int)
@@ -23,8 +22,7 @@ case object Racional extends CriterioEleccion {
 }
 
 case object Arriesgado extends CriterioEleccion {
-  def apply(distribucion: DistribucionApuestas): Int =
-    distribucion.sucesos.maxBy(_.valor).valor
+  def apply(distribucion: DistribucionApuestas): Int = distribucion.sucesos.maxBy(_.valor).valor
 }
 
 case object Cauto extends CriterioEleccion {
@@ -37,6 +35,5 @@ case object Inventado extends CriterioEleccion {
 }
 
 case class CriterioCustom(criterio: DistribucionApuestas => Int) extends CriterioEleccion {
-  override def apply(distribucion: DistribucionApuestas): Plata =
-    criterio(distribucion)
+  override def apply(distribucion: DistribucionApuestas): Plata = criterio(distribucion)
 }

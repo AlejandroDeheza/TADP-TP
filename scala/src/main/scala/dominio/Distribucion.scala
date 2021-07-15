@@ -18,11 +18,11 @@ case class SucesoConEstados(valor: Plata, probabilidad: Double, historial: List[
     copy(
       valor = valor - apuesta.montoApostado + ganancia,
       probabilidad = probabilidad * s.probabilidad,
-      historial = historial ++ List(estado)
+      historial = historial :+ estado
     )
   }
 
-  def indicarQueNoJugo(apuesta: ApuestaSimple[_]): SucesoConEstados = copy(historial = historial ++ List(NoJugo(apuesta)))
+  def indicarQueNoJugo(apuesta: ApuestaSimple[_]): SucesoConEstados = copy(historial = historial :+ NoJugo(apuesta))
 }
 
 case class SucesoPonderado[T](valor: T, pesoPonderado: Int)

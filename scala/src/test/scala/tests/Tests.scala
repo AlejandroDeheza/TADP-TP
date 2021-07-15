@@ -9,7 +9,7 @@ import util.Utils.ResultadoRuleta
 
 class Tests extends AnyFreeSpec {
 
-  "Primera parte - Jugadas y Apuestas" - {
+  "Punto 1 - Jugadas y Apuestas" - {
 
     "Si utilizo la jugada “jugar a duplicar si sale cara” poniendo $20 y el resultado del juego es cara, obtengo $40," +
       " mientras que si uso la misma jugada con el mismo monto pero el resultado del juego es seca, obtengo $0" in {
@@ -71,7 +71,7 @@ class Tests extends AnyFreeSpec {
     }
   }
 
-  "Segunda parte - Apuestas compuestas" - {
+  "Punto 2 - Apuestas compuestas" - {
     val apuestaCompuesta = ApuestaCompuesta[ResultadoRuleta](
       List(ApuestaSimple(25, Ruleta(Rojo)), ApuestaSimple(10, Ruleta(SegundaDocena)), ApuestaSimple(30, Ruleta(Al(23))))
     )
@@ -90,31 +90,50 @@ class Tests extends AnyFreeSpec {
 
   }
 
-  "Punto 3 - Distribuciones: Crear las distribuciones de probabilidad de" - {
-    "El juego de ‘cara o cruz’, donde hay 50% de chances de que salga Cara y 50% de que salga Cruz" in {
+  "Punto 3 - Distribuciones" - {
+
+    "Distribucion CaraCruz, donde hay 50% de chances de que salga Cara y 50% de que salga Cruz" in {
       val distribucion = CaraCruz.distribucionResultados
       distribucion.probabilidadDe(Cara) should be(0.50)
       distribucion.probabilidadDe(Cruz) should be(0.50)
+
+      distribucion.sucesos.map(_.probabilidad).sum should be(1.0 +- 0.0001)
     }
 
-    "La ruleta, que tiene las mismas chances de que salga cualquiera de los 37 números" in {
+    "Distribucion Ruleta, que tiene las mismas chances de que salga cualquiera de los 37 números" in {
       val distribucion = Ruleta.distribucionResultados
-      distribucion.probabilidadDe(0) should be(1 / 37.0 +- 0.0001)
+      distribucion.probabilidadDe( 0) should be(1 / 37.0 +- 0.0001)
       distribucion.probabilidadDe(17) should be(1 / 37.0 +- 0.0001)
       distribucion.probabilidadDe(36) should be(1 / 37.0 +- 0.0001)
+
+      distribucion.sucesos.map(_.probabilidad).sum should be(1.0 +- 0.0001)
     }
 
-    "‘Cara o cruz’ pero con una moneda cargada, en este caso sale Cara 4 de cada 7 veces y Cruz las restantes" in {
+    "Distribucion CaraCruz pero con una moneda cargada, en este caso sale Cara 4 de cada 7 veces y Cruz las restantes" in {
       val lista: List[SucesoPonderado[ResultadoCaraCruz]] = List(SucesoPonderado(Cara, 4), SucesoPonderado(Cruz, 3))
       val distribucion = GeneradorDistribuciones(Ponderados(lista))
       distribucion.probabilidadDe(Cara) should be(0.5714 +- 0.0001)
       distribucion.probabilidadDe(Cruz) should be(0.4285 +- 0.0001)
+
+      distribucion.sucesos.map(_.probabilidad).sum should be(1.0 +- 0.0001)
+    }
+
+    "Sucesos posibles" in {
+      val lista: List[SucesoPonderado[ResultadoCaraCruz]] = List(SucesoPonderado(Cara, 4), SucesoPonderado(Cruz, 0))
+      val distribucion = GeneradorDistribuciones(Ponderados(lista))
+      distribucion.probabilidadDe(Cara) should be(1.0 +- 0.0001)
+      distribucion.probabilidadDe(Cruz) should be(0.0 +- 0.0001)
+
+      distribucion.sucesos.map(_.probabilidad).sum should be(1.0 +- 0.0001)
+      distribucion.sucesosPosibles.length should be(1)
+      distribucion.sucesosPosibles.head should be(Cara)
     }
   }
 
-  "Punto 4 - Permitir que un jugador juegue sucesivamente varios juegos" - {
-    val juegos = List(ApuestaSimple(10, CaraCruz(Cara)), ApuestaSimple(15, Ruleta(Al(0))))
-    val distribucion = ApuestasSucesivas(juegos).apply(15)
+  "Punto 4 - ApuestasSucesivas" - {
+    val apuestas = List(ApuestaSimple(10, CaraCruz(Cara)), ApuestaSimple(15, Ruleta(Al(0))))
+    val distribucion = ApuestasSucesivas(apuestas).apply(15)
+    distribucion.sucesos.head.historial.length should be(2)
 
     "cantidad de sucesos posibles" in {
       distribucion.sucesosPosibles.length should be(3)
@@ -131,40 +150,133 @@ class Tests extends AnyFreeSpec {
     "probabilidad de conseguir 5 pesos" in {
       distribucion.probabilidadDe(5) should be(0.500 +- 0.0001)
     }
+
+    "lista apuestas vacia" in {
+      val distribucion = ApuestasSucesivas(List()).apply(15)
+      distribucion.sucesosPosibles.length should be(1)
+      distribucion.sucesosPosibles.head should be(15)
+    }
+
+    "ampliarDistribucion() si no juega" in {
+      val distribucion = ApuestasSucesivas(List()).apply(15)
+      val apuesta = ApuestaSimple(20, CaraCruz(Cruz))
+      val otraDistribucion = apuesta.ampliarDistribucion(distribucion)
+      otraDistribucion.sucesos.length should be(1)
+      otraDistribucion.sucesosPosibles.length should be(1)
+      otraDistribucion.sucesosPosibles.head should be(15)
+      otraDistribucion.probabilidadDe(15) should be(1.0 +- 0.0001)
+
+      otraDistribucion.sucesos.head.historial.length should be(1)
+      otraDistribucion.sucesos.head.historial.head should be(NoJugo(apuesta))
+    }
+
+    "ampliarDistribucion() si gana o pierde" in {
+      val distribucion = ApuestasSucesivas(List()).apply(25)
+      val apuesta = ApuestaSimple(20, CaraCruz(Cruz))
+      val otraDistribucion = apuesta.ampliarDistribucion(distribucion)
+      otraDistribucion.sucesos.length should be(2)
+      otraDistribucion.sucesosPosibles.length should be(2)
+      otraDistribucion.probabilidadDe(45) should be(0.5 +- 0.0001)
+      otraDistribucion.probabilidadDe( 5) should be(0.5 +- 0.0001)
+      otraDistribucion.probabilidadDe( 0) should be(0.0 +- 0.0001)
+    }
+
+    "ampliarDistribucion() con las jugadas de ruleta" in {
+      val distribucion = ApuestasSucesivas(List()).apply(20)
+      val apuesta1 = ApuestaSimple(20, Ruleta(Rojo))
+      val apuesta2 = ApuestaSimple(20, Ruleta(Negro))
+      val apuesta3 = ApuestaSimple(20, Ruleta(Par))
+      val apuesta4 = ApuestaSimple(20, Ruleta(Impar))
+      val apuesta5 = ApuestaSimple(20, Ruleta(SegundaDocena))
+      val apuesta6 = ApuestaSimple(20, Ruleta(Al(4)))
+
+      val otraDistribucion1 = apuesta1.ampliarDistribucion(distribucion)
+      otraDistribucion1.sucesosPosibles.length should be(2)
+      otraDistribucion1.probabilidadDe(40) should be(18/37.0 +- 0.0001)
+      otraDistribucion1.probabilidadDe( 0) should be(19/37.0 +- 0.0001)
+      otraDistribucion1.sucesos.head.historial.length should be(1)
+
+      val otraDistribucion2 = apuesta2.ampliarDistribucion(distribucion)
+      otraDistribucion2.sucesosPosibles.length should be(2)
+      otraDistribucion2.probabilidadDe(40) should be(18/37.0 +- 0.0001)
+      otraDistribucion2.probabilidadDe( 0) should be(19/37.0 +- 0.0001)
+      otraDistribucion2.sucesos.head.historial.length should be(1)
+
+      val otraDistribucion3 = apuesta3.ampliarDistribucion(distribucion)
+      otraDistribucion3.sucesosPosibles.length should be(2)
+      otraDistribucion3.probabilidadDe(40) should be(18/37.0 +- 0.0001)
+      otraDistribucion3.probabilidadDe( 0) should be(19/37.0 +- 0.0001)
+      otraDistribucion3.sucesos.head.historial.length should be(1)
+
+      val otraDistribucion4 = apuesta4.ampliarDistribucion(distribucion)
+      otraDistribucion4.sucesosPosibles.length should be(2)
+      otraDistribucion4.probabilidadDe(40) should be(18/37.0 +- 0.0001)
+      otraDistribucion4.probabilidadDe( 0) should be(19/37.0 +- 0.0001)
+      otraDistribucion4.sucesos.head.historial.length should be(1)
+
+      val otraDistribucion5 = apuesta5.ampliarDistribucion(distribucion)
+      otraDistribucion5.sucesosPosibles.length should be(2)
+      otraDistribucion5.probabilidadDe(60) should be(12/37.0 +- 0.0001)
+      otraDistribucion5.probabilidadDe( 0) should be(25/37.0 +- 0.0001)
+      otraDistribucion5.sucesos.head.historial.length should be(1)
+
+      val otraDistribucion6 = apuesta6.ampliarDistribucion(distribucion)
+      otraDistribucion6.sucesosPosibles.length should be(2)
+      otraDistribucion6.probabilidadDe(720) should be(1/37.0 +- 0.0001)
+      otraDistribucion6.probabilidadDe(  0) should be(36/37.0 +- 0.0001)
+      otraDistribucion6.sucesos.head.historial.length should be(1)
+    }
+
+    "ApuestaSucesiva con ApuestaCompuesta" in {
+      val distribucionVacia = ApuestasSucesivas(List()).apply(15)
+      val apuestas = List(ApuestaSimple(10, CaraCruz(Cara)), ApuestaSimple(15, CaraCruz(Cruz)))
+
+      val apuestasCompuestas = List(ApuestaCompuesta(apuestas))
+      val distribucion1 = ApuestasSucesivas(apuestasCompuestas).apply(15)
+      val distribucion2 = ApuestasSucesivas(apuestas).apply(15)
+      val distribucion3 = ApuestaCompuesta(apuestas).ampliarDistribucion(distribucionVacia)
+
+      distribucion1 should be(distribucion2)
+      distribucion1 should be(distribucion3)
+      distribucion2 should be(distribucion3)
+    }
   }
 
   "Punto 5 - jugadores" - {
-    val juegos1 = List(ApuestaSimple(30, CaraCruz(Cara)), ApuestaSimple(15, CaraCruz(Cara)))
-    val juegos2 = List(ApuestaSimple(20, Ruleta(Al(12))))
-    val juegos3 = List(ApuestaSimple(15, Ruleta(SegundaDocena)))
-    val juegos4 = List(ApuestaSimple(14, Ruleta(Rojo)), ApuestaSimple(43, Ruleta(Impar)), ApuestaSimple(13, CaraCruz(Cruz)))
+    val apuestas1 = List(ApuestaSimple(30, CaraCruz(Cara)), ApuestaSimple(15, CaraCruz(Cara)))
+    val apuestas2 = List(ApuestaSimple(20, Ruleta(Al(12))))
+    val apuestas3 = List(ApuestaSimple(14, Ruleta(Rojo)), ApuestaSimple(43, Ruleta(Impar)), ApuestaSimple(13, CaraCruz(Cruz)))
 
-    val juegosSucesivos1 = ApuestasSucesivas(juegos1)
-    val juegosSucesivos2 = ApuestasSucesivas(juegos2)
-    val juegosSucesivos3 = ApuestasSucesivas(juegos3)
-    val juegosSucesivos4 = ApuestasSucesivas(juegos4)
+    val apuestasSucesivos1 = ApuestasSucesivas(apuestas1)
+    val apuestasSucesivos2 = ApuestasSucesivas(apuestas2)
+    val apuestasSucesivos3 = ApuestasSucesivas(apuestas3)
 
-    val combinacionesDeJuegos = List(juegosSucesivos1, juegosSucesivos2, juegosSucesivos3, juegosSucesivos4)
+    val combinacionesDeApuestas = List(apuestasSucesivos1, apuestasSucesivos2, apuestasSucesivos3)
 
     val jugador1 = Jugador(30, Racional)
     val jugador2 = Jugador(50, Arriesgado)
     val jugador3 = Jugador(90, Cauto)
     val jugador4 = Jugador(130, Inventado)
+    val jugadorCustom = Jugador(100, CriterioCustom(distribucion => distribucion.sucesos.length))
 
-    "1" in {
-      jugador1(combinacionesDeJuegos).getOrElse(None) should be((juegosSucesivos1, juegosSucesivos1(30)))
+    "Racional" in {
+      jugador1(combinacionesDeApuestas) should be((apuestasSucesivos1, apuestasSucesivos1(30)))
     }
 
-    "2" in {
-      jugador2(combinacionesDeJuegos).getOrElse(None) should be((juegosSucesivos2, juegosSucesivos2(50)))
+    "Arriesgado" in {
+      jugador2(combinacionesDeApuestas) should be((apuestasSucesivos2, apuestasSucesivos2(50)))
     }
 
-    /*"3" in {
-      jugador3(combinacionesDeJuegos).getOrElse(None)  should be((juegosSucesivos3, juegosSucesivos3(90)))
-    } // todo: revisar*/
+    "Cauto" in {
+      jugador3(combinacionesDeApuestas) should be((apuestasSucesivos1, apuestasSucesivos1(90)))
+    }
 
-    "4" in {
-      jugador4(combinacionesDeJuegos).getOrElse(None) should be((juegosSucesivos4, juegosSucesivos4(130)))
+    "Inventado" in {
+      jugador4(combinacionesDeApuestas) should be((apuestasSucesivos3, apuestasSucesivos3(130)))
+    }
+
+    "Custom" in {
+      jugadorCustom(combinacionesDeApuestas) should be((apuestasSucesivos3, apuestasSucesivos3(100)))
     }
   }
 }
