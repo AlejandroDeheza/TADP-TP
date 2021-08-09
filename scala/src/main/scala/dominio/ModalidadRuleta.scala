@@ -3,13 +3,15 @@ package dominio
 sealed trait ModalidadRuleta {
   val mult: Int
   val multSiPierde: Int = 0
-  val probGanarYPerder: (Double, Double)
+  val probGanarPerderEmpatar: (Double, Double, Double)
 }
 
-sealed trait ModalidadBasica extends ModalidadRuleta { lazy val probGanarYPerder: (Double, Double) = (18/37.0, 19/37.0) }
+sealed trait ModalidadBasica extends ModalidadRuleta {
+  lazy val probGanarPerderEmpatar: (Double, Double, Double) = (18/37.0, 19/37.0, 0.0)
+}
 
 sealed trait Docena extends ModalidadRuleta {
-  lazy val probGanarYPerder: (Double, Double) = (12/37.0, 25/37.0)
+  lazy val probGanarPerderEmpatar: (Double, Double, Double) = (12/37.0, 25/37.0, 0.0)
   val rango: Range
   def contiene(num: Int): Boolean = rango.contains(num)
 }
@@ -25,7 +27,7 @@ case class SegundaDocena(mult: Int = 3) extends Docena { lazy val rango: Range =
 case class TercerDocena (mult: Int = 3) extends Docena { lazy val rango: Range = 25 to 36 }
 
 case class Al(numeroElegido: Int, mult: Int = 36) extends ModalidadRuleta {
-  lazy val probGanarYPerder: (Double, Double) = (1/37.0, 36/37.0)
+  lazy val probGanarPerderEmpatar: (Double, Double, Double) = (1/37.0, 36/37.0, 0.0)
 }
 
 

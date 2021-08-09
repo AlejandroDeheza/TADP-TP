@@ -12,9 +12,13 @@ case class SucesoConProbabilidad[T](valor: T, probabilidad: Double) extends Suce
 
 case class SucesoConEstados(valor: Plata, probabilidad: Double, historial: List[EstadoApuesta]) extends SucesoProb[Plata] {
 
-  def indicarSiGanoOPerdio(s: SucesoConProbabilidad[Plata], apuesta: ApuestaSimple[_]): SucesoConEstados = {
+  def agregarEstado(s: SucesoConProbabilidad[Plata], apuesta: ApuestaSimple[_]): SucesoConEstados = {
     val ganancia = s.valor
-    val estado = if (ganancia == 0) Perdio(apuesta) else Gano(apuesta)
+    val estado = ganancia match {
+      case ganancia if ganancia == apuesta.montoApostado => Empato(apuesta)
+      case 0 => Perdio(apuesta)
+      case _ => Gano(apuesta)
+    }
     copy(
       valor = valor - apuesta.montoApostado + ganancia,
       probabilidad = probabilidad * s.probabilidad,
@@ -56,6 +60,8 @@ sealed trait Distribucion[T] {
   lazy val sucesosPosibles: List[T] = for (s <- sucesos if s.probabilidad > 0.0) yield s.valor
 
   def probabilidadDe(valor: T): Double = sucesos.find(s => s.valor == valor).map(_.probabilidad).getOrElse(0.0)
+
+  def probabilidadTotalDe(valor: T): Double = sucesos.filter(s => s.valor == valor).map(_.probabilidad).sum
 }
 
 case class DistribucionProbabilidad[T](sucesos: List[SucesoConProbabilidad[T]]) extends Distribucion[T]

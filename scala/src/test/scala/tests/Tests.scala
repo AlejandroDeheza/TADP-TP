@@ -19,34 +19,34 @@ class Tests extends AnyFreeSpec {
     }
 
     "jugadas de CaraCruz" in {
-      CaraCruz(Cara).cumpleCon(Cara) should be(true)
-      CaraCruz(Cruz).cumpleCon(Cruz) should be(true)
-      CaraCruz(Cara).cumpleCon(Cruz) should be(false)
-      CaraCruz(Cruz).cumpleCon(Cara) should be(false)
+      CaraCruz(Cara)(Cara, 10) should be(20)
+      CaraCruz(Cruz)(Cruz, 10) should be(20)
+      CaraCruz(Cara)(Cruz, 10) should be(0)
+      CaraCruz(Cruz)(Cara, 10) should be(0)
     }
 
     "jugadas de ruleta" in {
-      Ruleta(Rojo).cumpleCon(Rojo.valores.last)    should be(true)
-      Ruleta(Rojo).cumpleCon(Rojo.valores(5))      should be(true)
-      Ruleta(Negro).cumpleCon(Negro.valores(5))    should be(true)
-      Ruleta(Rojo).cumpleCon(Negro.valores.last)   should be(false)
-      Ruleta(Rojo).cumpleCon(Negro.valores(5))     should be(false)
-      Ruleta(Negro).cumpleCon(Rojo.valores(5))     should be(false)
-      Ruleta(Rojo).cumpleCon(0)    should be(false)
-      Ruleta(Negro).cumpleCon(0)   should be(false)
+      Ruleta(Rojo)(Rojo.valores.last, 10)    should be(20)
+      Ruleta(Rojo)(Rojo.valores(5), 10)      should be(20)
+      Ruleta(Negro)(Negro.valores(5), 10)    should be(20)
+      Ruleta(Rojo)(Negro.valores.last, 10)   should be(0)
+      Ruleta(Rojo)(Negro.valores(5), 10)     should be(0)
+      Ruleta(Negro)(Rojo.valores(5), 10)     should be(0)
+      Ruleta(Rojo)(0, 10)    should be(0)
+      Ruleta(Negro)(0, 10)   should be(0)
 
-      Ruleta(Par).cumpleCon(14)    should be(true)
-      Ruleta(Impar).cumpleCon(15)  should be(true)
-      Ruleta(Par).cumpleCon(0)     should be(false)
-      Ruleta(Impar).cumpleCon(0)   should be(false)
+      Ruleta(Par)(14, 10)    should be(20)
+      Ruleta(Impar)(15, 10)  should be(20)
+      Ruleta(Par)(0, 10)     should be(0)
+      Ruleta(Impar)(0, 10)   should be(0)
 
-      Ruleta(SegundaDocena).cumpleCon(15) should be(true)
-      Ruleta(SegundaDocena).cumpleCon(10) should be(false)
-      Ruleta(SegundaDocena).cumpleCon(0)  should be(false)
+      Ruleta(SegundaDocena)(15, 10) should be(30)
+      Ruleta(SegundaDocena)(10, 10) should be(0)
+      Ruleta(SegundaDocena)(0, 10)  should be(0)
 
-      Ruleta(Al(23)).cumpleCon(23) should be(true)
-      Ruleta(Al(23)).cumpleCon(14) should be(false)
-      Ruleta(Al(0)).cumpleCon(0)   should be(true)
+      Ruleta(Al(23))(23, 10) should be(360)
+      Ruleta(Al(23))(14, 10) should be(0)
+      Ruleta(Al(0))(0, 10)   should be(360)
     }
 
     "Ganancias obtenidas de ApuestaSimple" in {
@@ -174,10 +174,11 @@ class Tests extends AnyFreeSpec {
       val distribucion = ApuestasSucesivas(List()).apply(25)
       val apuesta = ApuestaSimple(20, CaraCruz(Cruz))
       val otraDistribucion = apuesta.ampliarDistribucion(distribucion)
-      otraDistribucion.sucesos.length should be(2)
+      otraDistribucion.sucesos.length should be(3)
       otraDistribucion.sucesosPosibles.length should be(2)
       otraDistribucion.probabilidadDe(45) should be(0.5 +- 0.0001)
       otraDistribucion.probabilidadDe( 5) should be(0.5 +- 0.0001)
+      otraDistribucion.probabilidadDe(20) should be(0.0 +- 0.0001)
       otraDistribucion.probabilidadDe( 0) should be(0.0 +- 0.0001)
     }
 
@@ -277,6 +278,37 @@ class Tests extends AnyFreeSpec {
 
     "Custom" in {
       jugadorCustom(combinacionesDeApuestas) should be((apuestasSucesivos3, apuestasSucesivos3(100)))
+    }
+  }
+
+  "TP INDIVIDUAL" - {
+
+    "Apuesta Simple" in {
+      val apuesta = ApuestaSimple(10, PiedraPapelTijera(Piedra))
+
+      apuesta(Tijera) should be(20)
+      apuesta(Piedra) should be(10)
+      apuesta(Papel)  should be(0)
+
+      val distribucion = apuesta.distribucionGanancias
+      distribucion.sucesosPosibles.length should be(3)
+      distribucion.probabilidadDe(20) should be(0.4 +- 0.0001)
+      distribucion.probabilidadDe(10) should be(0.35 +- 0.0001)
+      distribucion.probabilidadDe( 0) should be(0.25 +- 0.0001)
+    }
+
+    "ApuestasSucesivas" in {
+      val apuestas = List(ApuestaSimple(20, PiedraPapelTijera(Piedra)), ApuestaSimple(20, PiedraPapelTijera(Piedra)))
+      val distribucion = ApuestasSucesivas(apuestas).apply(20)
+
+      distribucion.sucesos.length should be(7)
+      distribucion.sucesosPosibles.length should be(7)
+      distribucion.sucesos.forall(_.historial.length == apuestas.length) should be(true)
+      distribucion.sucesos.map(_.probabilidad).sum should be(1.0)
+
+      distribucion.probabilidadTotalDe(60) should be(0.16 +- 0.0001)
+      distribucion.probabilidadTotalDe( 0) should be(0.25 + 0.0875 +- 0.0001)
+      distribucion.probabilidadTotalDe( 1) should be( 0.0 +- 0.0001)
     }
   }
 }
