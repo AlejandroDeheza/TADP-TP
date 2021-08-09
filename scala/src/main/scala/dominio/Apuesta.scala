@@ -6,6 +6,7 @@ sealed trait EstadoApuesta
 case class Gano(apuesta: ApuestaSimple[_])   extends EstadoApuesta
 case class Perdio(apuesta: ApuestaSimple[_]) extends EstadoApuesta
 case class NoJugo(apuesta: ApuestaSimple[_]) extends EstadoApuesta
+case class Empato(apuesta: ApuestaSimple[_]) extends EstadoApuesta
 
 
 sealed trait Apuesta[T] extends (T => Plata) {
@@ -13,13 +14,9 @@ sealed trait Apuesta[T] extends (T => Plata) {
 }
 
 case class ApuestaSimple[T](montoApostado: Plata, jugada: Jugada[T]) extends Apuesta[T] {
-  lazy val ganar: Plata = jugada.multiplicador * montoApostado
-  lazy val perder: Plata = jugada.multiplicadorSiPierde * montoApostado
-  lazy val probs: (Double, Double) = jugada.probabilidadesGanarYPerder
-  lazy val distribucionGanancias: DistribucionProbabilidad[Plata] =
-    DistribucionProbabilidad(List(SucesoConProbabilidad(ganar, probs._1), SucesoConProbabilidad(perder, probs._2)))
+  lazy val distribucionGanancias: DistribucionProbabilidad[Plata] = jugada.distribucionGanancias(montoApostado)
 
-  def apply(resultadoObtenido: T): Plata = if (jugada.cumpleCon(resultadoObtenido)) ganar else perder
+  def apply(resultadoObtenido: T): Plata = jugada(resultadoObtenido, montoApostado)
 
   override def ampliarDistribucion(distInicial: DistribucionApuestas): DistribucionApuestas =
     distInicial.copy(sucesos = distInicial.sucesos.flatMap(generarSucesosNuevos))
@@ -28,7 +25,7 @@ case class ApuestaSimple[T](montoApostado: Plata, jugada: Jugada[T]) extends Apu
     if (suceso.valor < montoApostado)
       List( suceso.indicarQueNoJugo(this) )
     else
-      distribucionGanancias.sucesos.map{ suceso.indicarSiGanoOPerdio(_, this) }
+      distribucionGanancias.sucesos.map{ suceso.agregarEstado(_, this) }
   }
 }
 

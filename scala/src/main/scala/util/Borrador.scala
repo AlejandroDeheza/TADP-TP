@@ -195,3 +195,24 @@ case class AlNumero(numeroApostado: Int, multiplicador: Int = 36) extends Jugada
 case object PrimerDocena  extends DocenaObject { lazy val rango: Range =  1 to 12 }
 case object SegundaDocena extends DocenaObject { lazy val rango: Range = 13 to 24 }
 case object TercerDocena  extends DocenaObject { lazy val rango: Range = 25 to 36 }*/
+
+
+
+//override def cumpleCon(resultadoObtenido: ResultadoCaraCruz): Boolean = resultadoObtenido == resultadoElegido
+
+
+
+
+// TEST <<<-----------------------------------------
+
+/*println(distribucion.sucesosPosibles)
+      println(distribucion.sucesos.map(_.probabilidad))
+
+      println(distribucion.sucesos.head.historial)
+      println(distribucion.sucesos(1).historial)
+      println(distribucion.sucesos(2).historial)
+      println(distribucion.sucesos(3).historial)
+      println(distribucion.sucesos(4).historial)
+      println(distribucion.sucesos(5).historial)
+      println(distribucion.sucesos(6).historial)
+      */
